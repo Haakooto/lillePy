@@ -11,6 +11,10 @@ passables = ["var", "fint", "param", "const"]
 
 
 class OP:
+    def evaluate(f):
+        val = eval(f"OP.{f[0]}(f[1])")
+        return val
+
     def add(inp):
         typ1 = inp[0][0]
         typ2 = inp[1][0]
@@ -28,7 +32,9 @@ class OP:
 
 
 def main():
-    pass
+    f = ["add", [["fint", 1], ["fint", 2]]]
+    a = OP.evaluate(f)
+    print(a)
 
 
 if __name__ == "__main__":
