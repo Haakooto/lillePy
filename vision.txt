@@ -1,0 +1,17 @@
+LASER, LillefyAlgebraSystemEducationalResource
+
+Ta inn en funskjon, forstå dens oppbygning og kunne bruke denne. 
+Den skal finne en hovedvariabel, x, y, z, t, whatever, og andre variabler, paramtere. 
+Når vi evaluerer den må vi spesifisere hvilken parameter som er variabel, og defaulte til hovedvariabelen
+Funksjoner skal kunne opereres med andre funksjoner, til og med være paramtere/variabler.
+En funksjon f(x, a) skal kunne ta inn g(t) som a, og da bli f(x, t) = f(x, g(t)).
+Funksjoner skal kunne deriveres og integreres analytisk. Integrasjon kan komme senere, er noe vanskeligere enn derivasjon
+Derivasjon skjer implisitt på hovedvariabelen, men kan også ta inn andre for partiell derivering.
+
+Skal skrive GaussNewton litt mer generelt, slik at man lage en instans for ikke-lineær regresjon,
+og så sende inn en funksjon til denne. Man velger så hvilke parametere i funksjonen som skal varieres over,
+og GaussNewton klassen skal lage Jacobi-matrisen selv, ved partiell derivering med LASER.
+
+Man lager instans av LASER, si en enkel funksjon f = (2a+b)x^2+c. man kan så "feste" en parameter, a=4,
+slik at man etterop evaluerer f = (b+8)x^2+c. Deretter fester man b=2, f=10x^2+c. Så løser man a og b, og
+returnerer til f=(2a+b)x^2+c, alt på samme instans. Må ta vare på tidligere instanser, som git versjonskontroll!
