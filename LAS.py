@@ -70,39 +70,23 @@ class LAS:
         self.original = expression
         self.vars = Variables()
 
-        self.haupts = lambda: np.asarray(
-            [
-                list(self.vars.vars.items())[-i - 1][0]
-                if list(self.vars.vars.items())[-i - 1][1]() is None
-                else None
-                for i in range(len(self.vars.vars))
-            ]
-        )
-        self.haupt = lambda: self.haupts()[np.where(self.haupts())][0]
-        # self.haupt = lambda: np.asarray(
-        #     [
-        #         list(self.vars.vars.items())[-i - 1][0]
-        #         if list(self.vars.vars.items())[-i - 1][1]() is None
-        #         else None
-        #         for i in range(len(self.vars.vars))
-        #     ]
-        # )[
-        #     np.where(
-        #         np.asarray(
-        #             [
-        #                 list(self.vars.vars.items())[-i - 1][0]
-        #                 if list(self.vars.vars.items())[-i - 1][1]() is None
-        #                 else None
-        #                 for i in range(len(self.vars.vars))
-        #             ]
-        #         )
-        #     )
-        # ][
-        #     0
-        # ]
+        self.haupt = lambda: self.this(
+            np.asarray(
+                [
+                    list(self.vars.vars.items())[-i - 1][0]
+                    if list(self.vars.vars.items())[-i - 1][1]() is None
+                    else None
+                    for i in range(len(self.vars.vars))
+                ]
+            )
+        )[0]
 
         self.variables_given = False
         self.interpreted = False
+
+    @staticmethod
+    def this(f):
+        return f[np.where(f)]
 
     def decleare_variables(self, vars):
         self._add_variables(vars)
