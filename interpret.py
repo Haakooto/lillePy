@@ -7,11 +7,11 @@ import time
 class CAS:
     def __init__(self, expression):
         self.original = str(expression)
-        self.func = []
-        self._interpret(self.original)
+        self.func = [] # the list
+        self.variables = {} # dict with values of variables.
+        # Can be functions. defaults to not defined.
 
-    def __repr__(self):
-        pass
+        self._interpret(self.original)
 
     def __call__(self, x):
         pass
@@ -43,7 +43,7 @@ class CAS:
                 parenthesis -= 1
                 continue
             if char == ("+" or "-") and parenthesis == 0:
-                operator = 
+                operator =
                 term[self._chr_to_str(char)] = self._interpret(expr[:idx])
 
 
