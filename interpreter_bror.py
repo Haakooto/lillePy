@@ -74,6 +74,23 @@ class Interpreter:
 
         print(expr_list)
 
+        """
+				if opr_type in ['mul','div']:
+					if expr_empty:
+						expr_list.append([opr_type, self.constructor[i-1], self.constructor[i+1]])
+						expr_list = expr_list[0]
+						expr_empty = False
+					else:
+						expr_list = [opr_type, expr_list[-1], self.constructor[i+1]]
+				elif opr_type in ['add', 'sub']:
+					if expr_empty:
+						expr_list.append([opr_type, self.constructor[i-1], self.constructor[i+1]])
+						expr_list = expr_list[0]
+						expr_empty = False
+					else:
+						expr_list = [opr_type, expr_list, self.constructor[i+1]]
+		"""
+
         # print(expr_list)
 
 
