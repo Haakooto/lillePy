@@ -54,7 +54,7 @@ class Variables:
             f"variable {name} not defined in fuction"
 
     def __str__(self):
-        S = ""
+        S = "\nVariables decleared in function:\n"
         for i in self.vars:
             S += f"{i}: {self(i)}\n"
         return S
@@ -68,13 +68,14 @@ class LAS:
             )
 
         self.original = expression
+        self.expression = [s for s in expression]
         self.vars = Variables()
 
-        self.haupt = lambda: self.this(
+        self.haupt = lambda: self.there(
             np.asarray(
                 [
-                    list(self.vars.vars.items())[-i - 1][0]
-                    if list(self.vars.vars.items())[-i - 1][1]() is None
+                    list(self.vars.vars.keys())[-i - 1]
+                    if list(self.vars.vars.values())[-i - 1]() is None
                     else None
                     for i in range(len(self.vars.vars))
                 ]
@@ -85,7 +86,7 @@ class LAS:
         self.interpreted = False
 
     @staticmethod
-    def this(f):
+    def there(f):
         return f[np.where(f)]
 
     def decleare_variables(self, vars):
