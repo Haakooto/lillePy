@@ -2,21 +2,73 @@ import numpy as np
 
 
 class Interpreter:
+    symb_type = {"number": 1, "variable": 2, "operator": 3}
+    operator_list = ["+", "-", "*", "/"]
+
     def __init__(self, expr):
-        self.expr = expr
+        assert isinstance(expr, str)
+        self.original = expr
+        self.expr = expr.replace(" ", "")
+
         self.make_order0_list()
-
-    def make_order0_list(self):
-        self.operator_list = ["+", "-", "*", "/"]
-        self.constructor = []
-        for symb in self.expr:
-            self.constructor.append(symb)
-
-        # print(self.constructor, self.constructor_type)
         self.make_oder1_list()
 
+    def make_order0_list(self):
+        constructor = []
+        constructor_type = []
+
+        # Classify each symbol in expr as number, operator or letter
+        for symb in self.expr:
+            if symb in self.operator_list:
+                constructor_type.append(self.symb_type["operator"])
+            else:
+                try:
+                    float(symb)
+                    constructor_type.append(self.symb_type["number"])
+                except:
+                    constructor_type.append(self.symb_type["variable"])
+            constructor.append(symb)
+
+        self.constructor = constructor
+        self.constructor_type = constructor_type
+
+        self.reformat_expression()
+
+    def reformat_expression(self):
+        def merge_and_del(here):
+            self.constructor[here] += self.constructor[here + 1]
+            del self.constructor[here + 1]
+            del self.constructor_type[here + 1]
+
+        here = 0
+        typ = lambda idx: self.constructor_type[here + idx]
+        while True:
+            try:
+                value = typ(0) * typ(1)
+                if value == 1:
+                    merge_and_del(here)
+                elif value == 2:
+                    here += 1
+                    self.constructor.insert(here, "*")
+                    self.constructor_type.insert(here, self.symb_type["operator"])
+                elif value == 3:
+                    here += 1
+                elif value == 4:
+                    merge_and_del(here)
+                elif value == 6:
+                    here += 1
+                elif value == 9:
+                    self.check_valid_double_operator()
+
+            except IndexError:
+                break
+
+    def check_valid_double_operator(self):
+        """For symbols like **, ==, !="""
+        pass
+
     def make_oder1_list(self):
-        muldiv_list = []
+        # muldiv_list = []
         opr_type_dict = {"+": "add", "-": "sub", "*": "mul", "/": "div", "^": "pow"}
 
         # this first loop does all the powers
@@ -25,7 +77,7 @@ class Interpreter:
 
         dummy = []
         dummy_empty = True
-        custom_remove = [False, None]
+        # custom_remove = [False, None]
         prev_opr = None
         for i, obj in enumerate(self.constructor):
 
@@ -80,4 +132,6 @@ class Interpreter:
 
 
 expression = "1*2+3*4"
+expression = "211vs*3+53*lpets*ts+1"
+
 test = Interpreter(expression)
