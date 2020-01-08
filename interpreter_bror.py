@@ -45,6 +45,9 @@ class Interpreter:
         while True:
             try:
                 value = typ(0) * typ(1)
+            except IndexError:
+                break
+            else:
                 if value == 1:
                     merge_and_del(here)
                 elif value == 2:
@@ -59,9 +62,6 @@ class Interpreter:
                     here += 1
                 elif value == 9:
                     self.check_valid_double_operator()
-
-            except IndexError:
-                break
 
     def check_valid_double_operator(self):
         """For symbols like **, ==, !="""
@@ -135,3 +135,17 @@ expression = "1*2+3*4"
 expression = "211vs*3+53*lpets*ts+1"
 
 test = Interpreter(expression)
+
+
+"""
+ser ut som det er noe gale med make_order1:
+['mul', ['mul', [['mul', '211', 'vs']], '3', ['mul', '53', 'lpets']], 'ts']
+['211', '*', 'vs', '*', '3', '+', '53', '*', 'lpets', '*', 'ts', '+', '1']
+
+make_order0 fjerner ikke *1 og +0. Tror det kan være lurt å "evaluere"
+hver miniliste fra make_order1; [mul, ["mul", "211", "3"], f] umiddelbart erstattes av [mul, 633, f]
+Dette fjerner *1 og +0.
+Må bruke Variables-klasse fra LAS for å kunne evaluere variabler med None som verdi
+vet ikke hvordan vi gjør med ting som 3*f*2, ettersom den blir [mul, [mul, 3, f], 2]
+
+"""
