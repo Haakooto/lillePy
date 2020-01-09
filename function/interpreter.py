@@ -5,12 +5,13 @@ class Interpreter:
     symb_type = {"number": 1, "variable": 2, "operator": 3}
     operator_list = ["+", "-", "*", "/"]
 
-    def __init__(self, expr):
-        assert isinstance(expr, str)
+    def __init__(self, base, expr):
+        self.base = base
         self.original = expr
         self.expr = expr.replace(" ", "")
 
         self.make_order0_list()
+        self.add_variables()
         self.make_oder1_list()
 
     def make_order0_list(self):
@@ -67,6 +68,12 @@ class Interpreter:
         """For symbols like **, ==, !="""
         pass
 
+    def add_variables(self):
+        vars = np.asarray(self.constructor)[
+            np.where(np.asarray(self.constructor_type) == 2)
+        ]
+        self.base._add_variables(vars)
+
     def make_oder1_list(self):
         # muldiv_list = []
         opr_type_dict = {"+": "add", "-": "sub", "*": "mul", "/": "div", "^": "pow"}
@@ -107,7 +114,8 @@ class Interpreter:
                     prev_opr = None
             except:
                 pass
-        print(dummy)
+        self.list = dummy
+        # print(dummy)
 
         # this third  loop does all addidtion and subtraction
         expr_list = []
@@ -128,13 +136,14 @@ class Interpreter:
             else:
                 expr_list.append(self.constructor[i])
 
-        print(expr_list)
+        # print(expr_list)
+        self.expr_list = expr_list
 
 
-expression = "1*2+3*4"
-expression = "211vs*3+53*lpets*ts+1"
+# expression = "1*2+3*4"
+# expression = "211vs*3+53*lpets*ts+1"
 
-test = Interpreter(expression)
+# test = Interpreter(expression)
 
 
 """
