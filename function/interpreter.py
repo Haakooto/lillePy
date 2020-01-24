@@ -5,13 +5,11 @@ class Interpreter:
     symb_type = {"number": 1, "variable": 2, "operator": 3}
     operator_list = ["+", "-", "*", "/"]
 
-    def __init__(self, base, expr):
-        self.base = base
+    def __init__(self, expr):
         self.original = expr
         self.expr = expr.replace(" ", "")
 
         self.make_order0_list()
-        self.add_variables()
         self.make_oder1_list()
 
     def make_order0_list(self):
