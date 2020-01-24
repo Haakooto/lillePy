@@ -1,0 +1,3 @@
+div(sin(x),cos(x))|tan|
+div(cos(x),sin(x))|cot|
+add(1,x)|newx|
