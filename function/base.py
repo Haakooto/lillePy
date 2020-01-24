@@ -5,6 +5,12 @@ from .interpreter import Interpreter
 
 
 class LAS:
+    class Intep(Interpreter):
+        def __init__(self, base, expr):
+            self.base = base
+            super().__init__(expr)
+            self.add_variables()
+
     def __init__(self, expression):
         if not isinstance(expression, str):
             raise TypeError(
@@ -26,7 +32,7 @@ class LAS:
             )
         )[0]
 
-        self.Interpreted = Interpreter(self, self.original)
+        self.Inter = self.Intep(self, self.original)
 
     @staticmethod
     def there(f):
