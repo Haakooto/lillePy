@@ -5,13 +5,15 @@ from interpreter_bror import *
 import write_manager as wm
 root = Tk()
 root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='LAS.png'))
-def get_e1():
-
+root.title('LAS [inDev]')
+def get_input(*args):
+    print(args)
     selections = ['Math mode', 'Define Function', 'Delete Function']
     mode_selection = selections[listbox.curselection()[0]]
 
     x = Variable('x')
     input = e1.get()
+    e1.delete(0, 'end')
 
 
 
@@ -49,29 +51,36 @@ def get_e1():
         if func_name[-3:] == '(x)':
             func_name = func_name[:-3]
         was_deleted = delfunc(func_name)
-        print(was_deleted)
+
         if was_deleted:
             text.insert('end','Deleted function "'+func_name+'".\n', 'success')
         elif not was_deleted:
             text.insert('end', 'No stored function with name "'+func_name+'".\n', 'fail')
 
-    #text.insert(END, '\n'+e1.get())
+
+def focus_in(*args):
+    if e1.get() == 'Enter expression':
+        e1.delete(0, 'end')
 
 #main entrty widget
-e1 = Entry(root, width = 20)
-e1.grid(row=1, column = 0)
 
 
-button = Button(root, text='Go', command=get_e1).grid(row=1, column = 1)
+#button = Button(root, text='Go', command=get_e1).pack(fill='both')#(row=1, column = 1)
+e1 = Entry(root, width = 2, bg='snow', relief=SUNKEN)
+e1.insert(0,'Enter expression')
+e1.pack(fill='x')
+e1.bind('<Return>', get_input)
+e1.bind('<FocusIn>', focus_in)
+
 text = Text(root, width=60,)
-text.grid(row=0)
+text.pack(side='right', pady=10)#(row=0)
 
-listbox = Listbox(root, width=15)
+
+listbox = Listbox(root, width=15, height=5, relief=RIDGE)
 listbox.insert(1,'Math mode')
 listbox.insert(2,'Define Function')
 listbox.insert(3, 'Delete Function')
-
-listbox.grid(row=0, column=1)
+listbox.pack(fill='x', anchor='n', pady=10)
 listbox.activate(index=0)
 
 #tags for colorschemes
