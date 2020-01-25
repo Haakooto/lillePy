@@ -1,11 +1,27 @@
-#a = (open('custom_functions_dir.txt', 'r').read().find('assert'))
-#print(a)
-#print(open('custom_functions_dir.txt', 'r').read()[a])
+
 debug = True
 import sys
 
-def word_locator_string(word, string):
-    pass
+def get_func_list(filename="custom_functions_dir.txt"):
+    file = open(filename, 'r+')
+    names = []
+    for line in file.readlines():
+        i = line.find('|')
+        names.append(line[i+1:-2])
+    return names
+
+def del_line(line_no, filename="custom_functions_dir.txt"):
+    file = open(filename, 'r+')
+    lines = file.readlines()
+    file.close()
+    file = open(filename, 'w')
+    print(lines, line_no)
+    try:
+        del lines[line_no]
+    except TypeError:
+        print('Error, Function ')
+    file.writelines(lines)
+    file.close()
 
 def symb_locator(line, symb, filename= "custom_functions_dir.txt"):
     file = open(filename, 'r')
@@ -47,10 +63,11 @@ def write_function(expr,fname):
         write.close()
         if debug:
             print("wrote function " + fname)
+            return True
     else:
         if debug:
             print('name "%s" already taken. No function stored' %fname)
-
+        return False
 def rewrite_function_name(old, new):
     filename= "custom_functions_dir.txt"
     line_no = line_locator(old)
@@ -85,5 +102,7 @@ def get_func(fname):
             sys.exit(1)
 
 
+
+
 if __name__ == '__main__':
-    print(get_func('tan'))
+    pass

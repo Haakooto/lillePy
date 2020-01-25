@@ -210,7 +210,7 @@ class sin(parentFunctions):
             self.variable = self.passed
         else:
             self.variable = None
-        self.call_exact = True
+        self.call_exact = False
 
 
     def __call__(self, *args):
@@ -238,6 +238,7 @@ class ln(parentFunctions):
 
 
     def __call__(self, *args):
+
         if len(args) == 1:
             arg = args[0]
             res = None

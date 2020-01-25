@@ -1,3 +1,4 @@
-div(sin(x),cos(x))|tan|
-div(cos(x),sin(x))|cot|
-add(1,x)|newx|
+add(2,x)|f|
+mul(4,x,x)|g|
+add(f(x),g(x))|h|
+add(f,g)|j|

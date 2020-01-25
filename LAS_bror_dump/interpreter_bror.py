@@ -48,10 +48,12 @@ class parentFunctions:
 
     def __str__(self):
         from custom_functions import customFunction, Variable
+
         print('__str__ called')
         if isinstance(self.passed, numbers.Number):
             print('numbers called')
-            return str(self(self.passed))#self.function_name + '(' + str(self.passed) + ')'
+            print(self.__call__(self.passed), 's')
+            return str(self.__call__(self.passed))#self.function_name + '(' + str(self.passed) + ')'
         elif isinstance(self.passed, Variable):
             print('variable called')
             return self.function_name + '(' + self.variable.var_name + ')'
