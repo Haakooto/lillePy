@@ -1,10 +1,10 @@
-from Tkinter import *
+from tkinter import *
 from custom_functions import *
 from main_functions import *
 from interpreter_bror import *
 import write_manager as wm
 root = Tk()
-
+root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='LAS.png'))
 def get_e1():
 
     selections = ['Math mode', 'Define Function', 'Delete Function']
