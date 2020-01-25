@@ -26,7 +26,7 @@ def get_input(*args):
         try:
             text.insert(END,input+'='+str(eval(input))+'\n')
         except NameError:
-            text.insert('end', 'No function "tan(x)" defined', 'fail')
+            text.insert('end', 'Error: Mathfail\n', 'fail')
 
     if mode_selection == 'Define Function':
 
