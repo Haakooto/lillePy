@@ -36,8 +36,8 @@ def get_input(*args):
             func_name = func_name[:-3]
 
 
-        func = customFunction(func_def)
-        was_written = func.set_name(func_name)
+        func = customFunction(func_def, name=func_name)
+        was_written = func.was_written
         if was_written:
             text.insert('end', 'Defined '+ input + '.\n', 'success')
         elif not was_written:
