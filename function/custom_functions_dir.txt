@@ -1,0 +1,5 @@
+add(1,x)|f|
+add(2,x)|g|
+add(f(x), g(x))|h|
+add(f,g)|j|
+f+g|r|
