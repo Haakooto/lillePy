@@ -42,4 +42,6 @@ class Variable:
 
 
 if __name__ == "__main__":
-    pass
+    x = Variable("x")
+    a = sub(1, 1)
+    print(a(2))
