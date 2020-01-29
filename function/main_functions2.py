@@ -61,6 +61,8 @@ class add(parentFunction):
                     if debug:
                         print("__str__ parentFunction")
                     if isinstance(obj, add):
+                        if obj == self:
+                            print('equal')
                         del temp_init_args[index]
                         self.init_args = temp_init_args
                         return str(
@@ -122,6 +124,9 @@ class add(parentFunction):
 
         # if the called argument is another function, the function will be called first'''
         elif isinstance(self.call_arg, parentFunction):
+            if self.call_arg == self:
+                #This is a bugfix that fixes tha issue of a function not being able to be called by itself
+                self.call_arg = add(self.call_arg.init_args)
             if debug:
                 print("is parentFunction")
             # first we check if the call_arg function is being called with
@@ -163,4 +168,10 @@ print(a(b(g)))
 """
 DONE recursive adding of same function returns None
 DONE adding called functions (called with number) does not remove the x from higher funtions: print(add(2,a(add(1,x))))
+'''
+
+## TODO:
+'''
+legg til pow-classe slik at multiplikasjon funker utenom string
+'''
 """
