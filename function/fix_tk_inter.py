@@ -5,6 +5,7 @@ import os
 import time
 from subprocess import run
 
+
 def get_tkinter():
     print()
     print("Preparing to install tkinter")
@@ -20,9 +21,10 @@ def get_tkinter():
     with open("~/.bashrc", "a") as file:
         file.write('export PATH="$PYENV_ROOT/bin:$PATH"\n')
         file.write('export PYENV_ROOT="$HOME/.pyenv"\n')
-        file.write('if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi\n')
+        file.write(
+            'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi\n'
+        )
     run('exec "$SHELL"'.split())
-
 
 
 def main():
@@ -36,9 +38,10 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.exit()
     main()
 
 
-pyenv global system 3.8.1
-touch ~/.python-version
-echo '3.8.1' >> ~/.python-version
+# pyenv global system 3.8.1
+# touch ~/.python-version
+# echo '3.8.1' >> ~/.python-version
