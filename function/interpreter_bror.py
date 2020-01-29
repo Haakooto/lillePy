@@ -1,129 +1,6 @@
-import numpy as np
+#import numpy as np
+import numbers
 
-
-class Interpreter:
-    def __init__(self, expr):
-        self.expr = expr
-        self.make_order0_list()
-
-    def make_order0_list(self):
-        self.operator_list = ["+", "-", "*", "/"]
-        self.constructor = []
-        for symb in self.expr:
-            self.constructor.append(symb)
-
-        # print(self.constructor, self.constructor_type)
-        self.make_oder1_list()
-
-    def make_oder1_list(self):
-        muldiv_list = []
-        self.opr_type_dict = {
-            "+": "add",
-            "-": "sub",
-            "*": "mul",
-            "/": "div",
-            "^": "pow",
-        }
-
-        # this will allow for parenthesis
-        constructor = self.constructor[:]
-        if "(" in constructor:
-            parnt_constructor = []
-            for i, obj in enumerate(constructor):
-
-                if obj == "(":
-                    par_1 = i
-                    j = 1
-                    while obj != ")":
-                        obj = constructor[i + j]
-                        parnt_constructor.append(obj)
-                        j += 1
-                    par_2 = i + j
-                    del parnt_constructor[-1]
-                    new = Interpreter(parnt_constructor)
-
-                    constructor[par_1] = new
-                    del constructor[par_1:par_2]
-
-        muldiv_construction = self.order1_constructor_builder(
-            self.constructor, ["*", "/"]
-        )
-
-        # print(muldiv_construction)
-        # the following prepares the list for add/sub construction
-        constructor_copy = self.constructor[:]
-        # print(muldiv_construction)
-        """
-        for i, obj in enumerate(constructor_copy):
-            if obj in ["*", "/"]:
-                constructor_copy[i] = muldiv_construction[0]
-                print(muldiv_construction, "a")
-                del muldiv_construction[0]
-                del constructor_copy[i - 1]
-                del constructor_copy[i + 1 - 1]
-                print(constructor_copy)
-        """
-        # finally, addsub constrction
-        # print(constructor_copy)
-        # addsub_construction = self.order1_constructor_builder(
-        #    constructor_copy, ["+", "-"]
-        # )
-
-        # print(addsub_construction)
-
-    def order1_constructor_builder(self, constructor, operations_symb):
-        """
-        This general function will construct a list for the given operations
-        """
-        # IKKE GIT COMMIT! SAMMENLIGN MED DE TO INDIVIDUELLE OPS
-        operations = [self.opr_type_dict[i] for i in operations_symb]
-        builder = []
-        prev_opr = None
-        dummy = []
-        # for i, obj in enumerate(constructor):
-
-        opr_list = [
-            i if x in operations_symb else None for i, x in enumerate(constructor)
-        ]
-        for i, a in enumerate(opr_list):
-            if a is None:
-                del opr_list[i]
-        print(opr_list)
-
-        for i, a in enumerate(opr_list):
-            if a is not None:
-                dummy.append(constructor[a - 1])
-
-            else:
-                if opr_list[i - 1] is not None:
-                    dummy.append(constructor[opr_list[i - 1] + 1])
-
-                if dummy != []:
-                    builder.append(dummy)
-                dummy = []
-        print(builder)
-        # print(builder, "a")
-        """
-                if dummy_empty:
-                    if prev_opr in operations:
-                        dummy = [opr, dummy, constructor[i + 1]]
-                    else:
-                        dummy.append([opr, constructor[i - 1], constructor[i + 1]])
-                    dummy_empty = False
-                else:
-                    if prev_opr in operations:
-                        dummy = [opr, dummy, constructor[i + 1]]
-                    else:
-                        dummy.append([opr, constructor[i - 1], constructor[i + 1]])
-                prev_opr = opr
-
-            try:
-                if obj in self.operator_list and obj not in operations_symb:
-                    prev_opr = None
-            except:
-                pass
-        """
-        return builder
 
 
 def listed_nest_remover(l):
@@ -149,86 +26,133 @@ def index_symbols(string, *symbol):
             symbls.append(i)
     return symbls
 
+class Variable:
+    def __init__(self, var_name):
+        self.var_name = var_name
 
-class Functions:
     def __str__(self):
-        passable_string = "("
-        for i in self.passed:
-            passable_string += str(i) + ","
+        return str(self.var_name)
 
-        passable_string = passable_string[:-1] + ")"
-
-        return self.function_name + passable_string
-
-
-class add(Functions):
-    def __init__(self, *passed):
-
-        self.function_name = "add"
-        self.passed = listed_nest_remover(list(passed))
-        for i, obj in enumerate(passed):
-            if obj == 0:
-                del self.passed[i]
-                break
-        for i, obj in enumerate(passed):
-            if isinstance(obj, add):
-                if len(self.passed) > 1:
-                    del self.passed[-1]
-                self.passed = add(self.passed + obj.passed).passed[0]
+    def __call__(self, *args):
+        print('__call__ in variable')
+        assert len(args) == 1
+        arg = args[0]
+        print(arg)
+        return self
 
 
-class mul(Functions):
-    def __init__(self, *passed):
-        self.function_name = "mul"
-        self.passed = list(passed)
-        for i, obj in enumerate(passed):
-            if isinstance(obj, mul):
-                del self.passed[-1]
-                self.passed = mul(self.passed + obj.passed).passed[0]
+class parentFunctions:
+    def __init__(self):
+        self.x = Variable('x')
 
 
-class Interpreter2:
-    def __init__(self, base_expr):
-        self.base_expr = base_expr
-        self.addsub()
+    def __str__(self):
+        from custom_functions import customFunction, Variable
 
-    def addsub(self):
+        print('__str__ called')
+        if isinstance(self.passed, numbers.Number):
+            print('numbers called')
+            print(self.__call__(self.passed), 's')
+            return str(self.__call__(self.passed))#self.function_name + '(' + str(self.passed) + ')'
+        elif isinstance(self.passed, Variable):
+            print('variable called')
+            return self.function_name + '(' + self.variable.var_name + ')'
+        elif isinstance(self.passed, parentFunctions):
+            print('parentFunctions called')
+            if self.call_exact:
+                print('call_exact called')
+                if isinstance(self.passed.passed, Variable):
+                    print('Variable called')
+                    return self.function_name + '(' + self.variable.var_name + ')'
+                elif isinstance(self.passed.passed, numbers.Number):
+                    print('numbers called')
+                    return self.function_name + '(' + str(self.passed.passed) + ')'
+                elif isinstance(self.passed.passed, parentFunctions):
+                    print('parentFunctions called')
+                    return str(self.passed.passed(self.passed.passed.passed))
+                else:
+                    print('Error')
+                    return None
 
-        index_operations = index_symbols(self.base_expr, "+", "-")
-        print(index_operations)
-        for j, index in enumerate(index_operations):
+            elif not self.call_exact:
+                print('not call_exact called')
+            #return self.function_name + '(' + str(self.passed(self.passed.passed)) + ')'
 
-            if j == len(index_operations) - 1:
-                addsub_result = add(addsub_result.passed, self.base_expr[index + 1 :])
+        if isinstance(self.passed, list):
+            main_str = self.function_name + '('
+            for passed in self.passed:
+                main_str += str(passed) + ','
+            return main_str[:-1] + ')'
 
-            elif j == 0:
-                addsub_result = add(
-                    self.base_expr[0:index],
-                    self.base_expr[index + 1 : index_operations[j + 1]],
-                )
 
+
+        '''
+        print('__str__ called')
+
+
+        if isinstance(self.variable, Variable):
+            print('ho')
+            #this will print if the funciton depends on a variable
+        def call_once():
+            if self.passed == self.variable:
+                # if func(x) is called
+                return self.function_name + '(' + self.variable.var_name + ')'
             else:
-                addsub_result = add(
-                    addsub_result.passed,
-                    self.base_expr[index + 1 : index_operations[j + 1]],
-                )
+                #if func(2) is called (2 can be any number)
+                return self(self.passed)
 
-        self.addsub_result = addsub_result
+        try:
+            if len(self.passed) > 1:
+                for passed in self.passed:
+                    if passed == self.variable:
+                        return call_once()
+                    elif isinstance(passed, parentFunctions):
+                        print(passed)
+                        return passed(passed.passed)
+        except AttributeError:
+            if isinstance(self.passed, Variable):
+                print(self.passed)
+                return self.passed(self.passed.passed)
+            else:
+                print(self.passed, 'ashuduishrit')
+                return self.passed
+        return 'FAILURE 2'
 
-    def __str__(self):
-        return str(self.addsub_result)
 
 
-expression = "A+B+C+cos(x)"
-a = add(1, 2, add(3, 2, 5))
-print(a)
-# test = Interpreter2(expression)
-# a = add(1, 2, add(3, 4, add(5, 6)))
-# b = mul(a, 7, 8, add("A", "B", mul("C", "D")))
+        try:
+            return self.function_name_super + '(x)'
+            #print(self.function_name_super)
+        except:
+            pass
+        passable_string = "("
+        try:
+            for obj in self.passed:
 
-B = Interpreter2(expression)
-print(B)
-# print(add(add("A"), add("B")))
-# print(closest_symbols(expression, 3))
-# todo for haakon
-# fjerne reduntant parantes
+                if isinstance(obj, customFunction):
+                    #passable_string += obj.custom_function_name
+                    #print('hey')
+                    break
+                else:
+                    passable_string += str(obj) + ","
+
+            passable_string = passable_string[:-1] + ")"
+
+            return self.function_name + passable_string
+        except TypeError:
+            print('ha')
+            if isinstance(self.passed, Variable):
+                return self.function_name + '(' + str(self.passed) + ')'
+            elif isinstance(self.passed, numbers.Number):
+                return str(self(self.passed))
+            elif isinstance(self.passed, parentFunctions):
+                return str(self(self.passed(self.passed.passed)))
+        '''
+
+
+
+
+if __name__ == '__main__':
+    x = Variable('x')
+    a = sub(1,1)
+    print(a(2))
