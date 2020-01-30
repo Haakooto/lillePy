@@ -185,6 +185,8 @@ class add(parentFunction):
                     if debug:
                         print("__str__ parentFunction")
                     if isinstance(obj, add):
+                        if obj == self:
+                            print("equal")
                         del temp_init_args[index]
                         self.init_args = temp_init_args
                         return str(
@@ -385,7 +387,7 @@ class sub(parentFunction):
             ]
             res = 0
             for obj in init_args_dummy:
-                if isinstance(obj, numbers.Number):
+                if isinstance(obj, (numbers.Number, np.ndarray)):
                     # if the object is a number, we simply add it to the result
                     res += obj
                 elif isinstance(obj, parentFunction):
