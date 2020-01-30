@@ -426,6 +426,28 @@ class sub(parentFunction):
                 pass
 
 
+class mul(parentFunction):
+    def __init__(self, *args):
+        super().__init__("mul")
+        self.init_args = list(args)
+        self.str_args = None
+        self.call_arg = None
+
+    def function_call(self, *args):
+        args = args[0]
+        numres = 1
+        for i, obj in enumerate(args):
+
+            if isinstance(obj, numbers.Number):
+                numres *= obj
+            elif isinstance(obj, parentFunction):
+                pass
+        return numres
+
+    def function_str(self, *args, call_exact=False):
+        return self()
+
+
 class sin(parentFunction):
     def __init__(self, *args):
         super().__init__("sin")
@@ -451,16 +473,38 @@ class sin(parentFunction):
         return self(arg)
 
 
+class cos(parentFunction):
+    def __init__(self, *args):
+        super().__init__("cos")
+        self.init_args = list(args)
+        self.str_args = None
+        self.call_arg = None
+
+    def function_call(self, *args):
+        arg = args[0][0]
+        if isinstance(arg, numbers.Number):
+
+            return np.cos(arg)
+        elif isinstance(arg, parentFunction):
+            return np.cos(arg(self.call_arg))
+
+    def function_str(self, *args, call_exact=False):
+        arg = args[0][0]
+
+        if isinstance(arg, Variable):
+            return "cos(x)"
+        elif call_exact:
+            return "cos(" + str(arg) + ")"
+        return self(arg)
+
+
 debug = False
 
 if __name__ == "__main__":
 
     x = Variable()
-    a = add(1, x)
-    b = add(2, x, x)
-    c = sin(x)
-
-    print(add(c, c, b, b))
+    a = mul(1, 2, 3)
+    print(add(1, x))
 # bugs:
 """
 DONE recursive adding of same function returns None
@@ -470,5 +514,6 @@ DONE adding called functions (called with number) does not remove the x from hig
 ## TODO:
 '''
 legg til pow-classe slik at multiplikasjon funker utenom string
+legg til sånn at sin(x) + sin(x) -> mul(2,sin(x)) i add
 '''
 """
