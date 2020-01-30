@@ -34,7 +34,7 @@ class add(parentFunction):
         else:
             assert len(args) > 1, '"add" takes more than 1 argument!'
 
-        # we create several varaibles for later
+        # we create several attributes for later
         self.init_args = list(args)
         self.str_args = None
         self.call_arg = None
@@ -62,7 +62,7 @@ class add(parentFunction):
                         print("__str__ parentFunction")
                     if isinstance(obj, add):
                         if obj == self:
-                            print('equal')
+                            print("equal")
                         del temp_init_args[index]
                         self.init_args = temp_init_args
                         return str(
@@ -113,7 +113,7 @@ class add(parentFunction):
             ]
             res = 0
             for obj in init_args_dummy:
-                if isinstance(obj, numbers.Number):
+                if isinstance(obj, (numbers.Number, np.ndarray)):
                     # if the object is a number, we simply add it to the result
                     res += obj
                 elif isinstance(obj, parentFunction):
@@ -125,7 +125,7 @@ class add(parentFunction):
         # if the called argument is another function, the function will be called first'''
         elif isinstance(self.call_arg, parentFunction):
             if self.call_arg == self:
-                #This is a bugfix that fixes tha issue of a function not being able to be called by itself
+                # This is a bugfix that fixes tha issue of a function not being able to be called by itself
                 self.call_arg = add(self.call_arg.init_args)
             if debug:
                 print("is parentFunction")
@@ -163,7 +163,21 @@ a = add(1, x)
 b = add(2, x)
 g = add(3, x)
 
-print(a(b(g)))
+print(g)
+print(g(1))
+
+y = np.arange(5)
+z = np.arange(5)
+
+h = str(g)
+print(h)
+
+print(g(y))
+
+print(y + z)
+X = add(y, z, x)
+print(X(1))
+
 # bugs:
 """
 DONE recursive adding of same function returns None
