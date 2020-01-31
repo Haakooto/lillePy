@@ -339,6 +339,8 @@ class add(parentFunction):
                     resvar = "+" + str(int(resvar[1]) + 1) + "*x"
         if resnumb == 0:
             resnumb = ""
+            resvar = resvar[1:]
+            resfunc = resfunc[1:]
 
         return str(resnumb) + resvar + resfunc
 
@@ -490,9 +492,10 @@ class mul(parentFunction):
                 elif resvar == "":
                     resvar = "*x"
                 else:
-                    resvar = "*x^" + str(int(resvar[3]) + 1)# + "*x"
-        if resnumb == 0:
+                    resvar = "*x^" + str(int(resvar[3]) + 1)  # + "*x"
+        if resnumb == 1:
             resnumb = ""
+            resvar = resvar[1:]
 
         return str(resnumb) + resvar + resfunc
 
@@ -552,10 +555,13 @@ debug = False
 if __name__ == "__main__":
 
     x = Variable()
-    a = add(1, 2, x, x)
-    b = mul(x, x, 3)
-    c = 2
-    print(a(b))
+    a = add(2, 2, x, x)
+    b = mul(x, 3)
+    c = add(mul(x, x), mul(3, 2), x, x, mul(4, x, x, x))
+    # c = mul(3,x)
+    # print(c)
+    a = add(1, x)
+    print(add(2, a(add(1, x))))
     # print(b(a(c)))
 # bugs:
 """
