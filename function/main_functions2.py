@@ -161,7 +161,7 @@ class add(parentFunction):
                 for j in range(i, len(args)):
                     # check if the same identical function is present:
                     pass
-        print(no_of_same_func_dict)
+        # print(no_of_same_func_dict)
 
     def __stre__(self, *args):
         if debug:
@@ -441,11 +441,61 @@ class mul(parentFunction):
             if isinstance(obj, numbers.Number):
                 numres *= obj
             elif isinstance(obj, parentFunction):
-                pass
+                numres *= obj(self.call_arg)
         return numres
 
     def function_str(self, *args, call_exact=False):
         return self()
+
+    def function_str(self, *args, call_exact=False):
+        # the manual str called from parent __str__
+        resnumb = 1
+        resvar = ""
+        resfunc = ""
+        init_args = args[0]
+        for index, obj in enumerate(init_args):
+
+            if isinstance(obj, parentFunction):
+
+                if debug:
+                    print("__str__ mul ")
+                if isinstance(obj, mul):
+                    del init_args[index]
+                    self.init_args = init_args
+                    return str(mul(listed_nest_remover(obj.init_args * self.init_args)))
+
+                else:
+
+                    # this will call if the called element is a function of not type mul
+
+                    # this temp variable is to check if the called function is a number or
+                    # undetermined function
+                    temp_resfunc = str(obj(obj.init_args[0]))
+
+                    try:
+                        # the float call will fail if temp_resfunc is not a string of a number
+                        resnumb *= float(temp_resfunc)
+
+                    except:
+                        try:
+                            resfunc += "*" + str(obj(obj.init_args[0]))
+                        except:
+                            resfunc += "*" + str(obj)
+
+            elif isinstance(obj, numbers.Number):
+                resnumb *= obj
+
+            elif isinstance(obj, Variable):
+                if resvar == "*x":
+                    resvar = "*x^2"
+                elif resvar == "":
+                    resvar = "*x"
+                else:
+                    resvar = "*" + str(int(resvar[1]) + 1) + "*x"
+        if resnumb == 0:
+            resnumb = ""
+
+        return str(resnumb) + resvar + resfunc
 
 
 class sin(parentFunction):
@@ -503,8 +553,11 @@ debug = False
 if __name__ == "__main__":
 
     x = Variable()
-    a = mul(1, 2, 3)
-    print(add(1, x))
+    a = add(1, 2, x, x)
+    b = mul(x, x, 3)
+    c = 2
+    print(a(b(c)))
+    print(b(a(c)))
 # bugs:
 """
 DONE recursive adding of same function returns None
