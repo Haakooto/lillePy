@@ -334,6 +334,8 @@ class add(parentFunction):
                 elif resvar == "":
                     resvar = "+x"
                 else:
+                    print("resvar")
+                    print(resvar[1])
                     resvar = "+" + str(int(resvar[1]) + 1) + "*x"
         if resnumb == 0:
             resnumb = ""
@@ -445,9 +447,6 @@ class mul(parentFunction):
         return numres
 
     def function_str(self, *args, call_exact=False):
-        return self()
-
-    def function_str(self, *args, call_exact=False):
         # the manual str called from parent __str__
         resnumb = 1
         resvar = ""
@@ -462,7 +461,7 @@ class mul(parentFunction):
                 if isinstance(obj, mul):
                     del init_args[index]
                     self.init_args = init_args
-                    return str(mul(listed_nest_remover(obj.init_args * self.init_args)))
+                    return str(mul(listed_nest_remover(obj.init_args + self.init_args)))
 
                 else:
 
@@ -491,7 +490,7 @@ class mul(parentFunction):
                 elif resvar == "":
                     resvar = "*x"
                 else:
-                    resvar = "*" + str(int(resvar[1]) + 1) + "*x"
+                    resvar = "*x^" + str(int(resvar[3]) + 1)# + "*x"
         if resnumb == 0:
             resnumb = ""
 
@@ -556,8 +555,8 @@ if __name__ == "__main__":
     a = add(1, 2, x, x)
     b = mul(x, x, 3)
     c = 2
-    print(a(b(c)))
-    print(b(a(c)))
+    print(a(b))
+    # print(b(a(c)))
 # bugs:
 """
 DONE recursive adding of same function returns None
