@@ -1,6 +1,6 @@
 import numpy as np
 from interpreter_bror import listed_nest_remover
-from main_functions2 import add, parentFunction
+from main_functions2 import add, mul, parentFunction, Variable
 
 
 class Interpreter:
@@ -17,6 +17,13 @@ class Interpreter:
 
         self.classify()
         self.reformat_expression()
+
+        self.do_splits()
+        # self.split_at_add()
+        # self.split_at_mul()
+
+    def __call__(self, *args):
+        return self.final(args)
 
     def classify(self):
         """
@@ -88,59 +95,102 @@ class Interpreter:
     #     ]
     #     self.base._add_variables(vars)
 
-    def split_at_add_old(self):
-        final_list = []
+    # def split_at_add_old(self):
+    #     final_list = []
 
-        here = -1
-        while True:
-            here += 1
-            try:
-                symb = self.constructor[here]
-            except IndexError:
-                break
+    #     here = -1
+    #     while True:
+    #         here += 1
+    #         try:
+    #             symb = self.constructor[here]
+    #         except IndexError:
+    #             break
 
-            if isinstance(symb, parentFunction):
-                pass
+    #         if isinstance(symb, parentFunction):
+    #             pass
 
-            if symb == "(":
-                parenthesis_count = 0
-                there = 0
-                while True:
-                    other = self.constructor[here + there]
-                    if other == "(":
-                        parenthesis_count += 1
-                    elif other == ")" and parenthesis_count == 0:
-                        self.cut_out_inner_func(here, there)
-                        break
-                    elif other == ")":
-                        parenthesis_count -= 1
-                    there += 1
+    #         if symb == "(":
+    #             parenthesis_count = 0
+    #             there = 0
+    #             while True:
+    #                 other = self.constructor[here + there]
+    #                 if other == "(":
+    #                     parenthesis_count += 1
+    #                 elif other == ")" and parenthesis_count == 0:
+    #                     self.cut_out_inner_func(here, there)
+    #                     break
+    #                 elif other == ")":
+    #                     parenthesis_count -= 1
+    #                 there += 1
 
-            elif symb == "+":
-                final_list.append([])
+    #         elif symb == "+":
+    #             final_list.append([])
+
+    def do_splits(self):
+        final = []
+        adds = self.split_at_add()
+        # print(adds)
+        for adder in adds:
+            muler = self.split_at_mul(adder)
+            print(muler, "muler")
+            final.append(muler)
+
+        print(final)
+        self.final = add(listed_nest_remover(final))
 
     def split_at_add(self):
         constructor = np.asarray(self.constructor, dtype=object)
-        final = []
+        constructed = []
 
         plus = np.where(constructor == "+")[0]
         # print(plus)
         if plus.size > 0:
 
-            final.append(list(constructor[0 : plus[0]]))
+            constructed.append(list(constructor[0 : plus[0]]))
             for p in range(len(plus)):
                 try:
-                    final.append(list(constructor[plus[p] + 1 : plus[p + 1]]))
+                    constructed.append(list(constructor[plus[p] + 1 : plus[p + 1]]))
                 except IndexError:
-                    final.append(list(constructor[plus[-1] + 1 :]))
+                    constructed.append(list(constructor[plus[-1] + 1 :]))
                 # if p == 0:
-                #     final.append(list(constructor[0 : plus[0]]))
-                #     final.append(list(constructor[plus[0] + 1 : plus[1]]))
+                #     constructed.append(list(constructor[0 : plus[0]]))
+                #     constructed.append(list(constructor[plus[0] + 1 : plus[1]]))
                 # elif p == len(plus) - 1:
-                #     final.append(list(constructor[plus[p] + 1 :]))
+                #     constructed.append(list(constructor[plus[p] + 1 :]))
                 # else:
-                #     final.append(list(constructor[plus[p] + 1 : plus[p + 1]]))
-        return add(listed_nest_remover(final))
+                #     constructed.append(list(constructor[plus[p] + 1 : plus[p + 1]]))
+
+        return constructed
+
+    def split_at_mul(self, inn):
+        conster = np.asarray(inn, dtype=object)
+        consted = []
+
+        multiply = np.where(conster == "*")[0]
+        if multiply.size > 0:
+            consted.append(list(conster[0 : multiply[0]]))
+            for m in range(len(multiply)):
+                try:
+                    consted.append(list(conster[multiply[m] + 1 : multiply[m + 1]]))
+                except IndexError:
+                    consted.append(list(conster[multiply[-1] + 1 :]))
+
+        return mul(listed_nest_remover(consted))
+
+        # new_constructed = []
+
+        # constructed = np.asarray(const, dtype=object)
+        # if True:
+        #     multiply = np.where(constructed == "*")[0]
+
+        #     if multiply.size > 0:
+        #         new_constructed.append()
+
+        # print(constructed)
+        # constructed = [mul(i)(0) for i in constructed]
+        # print(constructed)
+        # constructed = add(*[[mul(j) for j in i] for i in constructed])
+        # return add(listed_nest_remover(constructed))
 
         # for here, symb in enumerate(self.constructor):
         #     if symb == "(":
@@ -166,16 +216,22 @@ class Interpreter:
         #         print(self.constructor)
 
         # print(final_list)
-        # self.final = add(final_list)
+        # self.constructed = add(final_list)
 
 
-expression = "1*2+3*4"
+x = Variable()
+expression = "1*2*3+3*4*x"
+# a = add(mul(1, 2, 3), mul(3, 4, x))
+# b = add(mul(3,4,x,x))
+# print(b)
+# print(a)
 # expression = "211vs*3+53*lpets*ts+1+x+2+3+4"
 # expression = "1+2+3"
 
 I = Interpreter(expression)
-print(I.constructor)
-a = I.split_at_add()
-print(a)
+print(I)
+# print(I.constructor)
+# a = I.split_at_add()
+# print(a)
 # print(I.constructor_type)
 

@@ -22,7 +22,7 @@ class parentFunction:
     def __init__(self, functionName):
         self.functionName = functionName
 
-        self.function_dict = {"add": add, "sin": sin}
+        self.function_dict = {"add": add, "div": div, "mul": mul, "sin": sin}
         self.function_class = eval(functionName)
 
     def __call__(self, *args):
@@ -60,7 +60,7 @@ class parentFunction:
             if debug:
                 print("parentFunction parentFunction")
             if self.call_arg == self:
-                # This is a bugfix that fixes tha issue of a function not being able to be called by itself
+                # This is a bugfix that fixes an issue of a function not being able to be called by itself
                 self.call_arg = self.function_class(self.call_arg.init_args)
                 # self.function_dict[self.functionName](
                 # self.call_arg.init_args
@@ -160,6 +160,7 @@ class add(parentFunction):
 
                 for j, obj2 in enumerate(args[i + 1 : -1]):
                     # check if the same identical function is present:
+
                     if (
                         isinstance(obj2, type(obj))
                         and all(elem in obj2.init_args for elem in obj.init_args)
@@ -167,7 +168,8 @@ class add(parentFunction):
                     ):
                         print(obj, obj2, "a")
 
-        print(no_of_same_func_dict)
+                    pass
+        # print(no_of_same_func_dict)
 
     def __stre__(self, *args):
         if debug:
@@ -340,9 +342,13 @@ class add(parentFunction):
                 elif resvar == "":
                     resvar = "+x"
                 else:
+                    print("resvar")
+                    print(resvar[1])
                     resvar = "+" + str(int(resvar[1]) + 1) + "*x"
         if resnumb == 0:
             resnumb = ""
+            resvar = resvar[1:]
+            resfunc = resfunc[1:]
 
         return str(resnumb) + resvar + resfunc
 
@@ -439,6 +445,7 @@ class mul(parentFunction):
         self.str_args = None
         self.call_arg = None
 
+    def function_call(self, *args):
         class custom_dictionary(dict):
             def __init__(self):
                 self = dict()
@@ -446,20 +453,182 @@ class mul(parentFunction):
             def add(self, key, value):
                 self[key] = value
 
-    def function_call(self, *args):
         args = args[0]
         numres = 1
         no_of_same_func_dict = custom_dictionary()
         for i, obj in enumerate(args):
-
+            print("yo")
             if isinstance(obj, numbers.Number):
                 numres *= obj
             elif isinstance(obj, parentFunction):
-                pass
+                numres *= obj(self.call_arg)
         return numres
 
     def function_str(self, *args, call_exact=False):
-        return self()
+        # the manual str called from parent __str__
+        resnumb = 1
+        resvar = ""
+        resfunc = ""
+        init_args = args[0]
+        for index, obj in enumerate(init_args):
+
+            if isinstance(obj, parentFunction):
+
+                if debug:
+                    print("__str__ mul ")
+                if isinstance(obj, mul):
+                    del init_args[index]
+                    self.init_args = init_args
+                    return str(mul(listed_nest_remover(obj.init_args + self.init_args)))
+
+                else:
+
+                    # this will call if the called element is a function of not type mul
+
+                    # this temp variable is to check if the called function is a number or
+                    # undetermined function
+                    temp_resfunc = str(obj(obj.init_args[0]))
+
+                    try:
+                        # the float call will fail if temp_resfunc is not a string of a number
+                        resnumb *= float(temp_resfunc)
+
+                    except:
+                        try:
+                            resfunc += "*" + str(obj(obj.init_args[0]))
+                        except:
+                            resfunc += "*" + str(obj)
+
+            elif isinstance(obj, numbers.Number):
+                resnumb *= obj
+
+            elif isinstance(obj, Variable):
+                if resvar == "*x":
+                    resvar = "*x^2"
+                elif resvar == "":
+                    resvar = "*x"
+                else:
+                    resvar = "*x^" + str(int(resvar[3]) + 1)  # + "*x"
+        if resnumb == 1:
+            resnumb = ""
+            resvar = resvar[1:]
+
+        return str(resnumb) + resvar + resfunc
+
+
+class div(parentFunction):
+    def __init__(self, *args):
+        super().__init__("div")
+        assert len(args) == 2, '"div" takes exactly two arguments. %i given' % int(
+            len(args)
+        )
+        self.init_args = list(args)
+        self.str_args = None
+        self.call_arg = None
+
+    def function_call(self, *args):
+        class custom_dictionary(dict):
+            def __init__(self):
+                self = dict()
+
+            def add(self, key, value):
+                self[key] = value
+
+        args = args[0]
+        numres = self.init_args[0]
+        no_of_same_func_dict = custom_dictionary()
+        for i, obj in enumerate(args):
+
+            if isinstance(obj, numbers.Number):
+                numres /= obj
+            elif isinstance(obj, parentFunction):
+                numres /= obj(self.call_arg)
+        return numres
+
+    def function_str(self, *args, call_exact=False):
+        # the manual str called from parent __str__
+        resnumb_num = None
+        resvar_num = None
+        resfunc_num = None
+
+        resnumb_den = None
+        resvar_den = None
+        resfunc_den = None
+        init_args = args[0]
+        for index, obj in enumerate(init_args):
+            # we iterate over the two objects in init_args
+            if index == 0:
+
+                if isinstance(obj, numbers.Number):
+                    resnumb_num = obj
+
+                elif isinstance(obj, parentFunction):
+                    if isinstance(obj, div):
+                        return str(
+                            div(
+                                obj.init_args[0],
+                                mul(self.init_args[1], obj.init_args[1]),
+                            )
+                        )
+                    else:
+                        temp_resfunc = str(obj(obj.init_args[0]))
+
+                        try:
+                            # the float call will fail if temp_resfunc is not a string of a number
+                            resnumb_num = float(temp_resfunc)
+
+                        except:
+                            try:
+                                resfunc_num = str(obj(obj.init_args[0]))
+                            except:
+                                resfunc_num = str(obj)
+
+                elif isinstance(obj, Variable):
+                    resvar_num = "x"
+
+            elif index == 1:
+
+                if isinstance(obj, numbers.Number):
+                    resnumb_den = obj
+
+                elif isinstance(obj, parentFunction):
+                    if isinstance(obj, div):
+                        return str(
+                            div(
+                                mul(self.init_args[0], obj.init_args[1]),
+                                obj.init_args[0],
+                            )
+                        )
+                    else:
+                        temp_resfunc = str(obj(obj.init_args[0]))
+
+                        try:
+                            # the float call will fail if temp_resfunc is not a string of a number
+                            resnumb_den = float(temp_resfunc)
+
+                        except:
+                            try:
+                                resfunc_den = str(obj(obj.init_args[0]))
+                            except:
+                                resfunc_den = str(obj)
+                elif isinstance(obj, Variable):
+                    resvar_den = "x"
+
+        numerator = [resnumb_num, resvar_num, resfunc_num]
+        denominator = [resnumb_den, resvar_den, resfunc_den]
+
+        final_string = ""
+        for num in numerator:
+            if num is not None:
+                final_string += str(num)
+        final_string += "/"
+        for den in denominator:
+            if den is not None:
+                if len(str(den)) > 1:
+                    final_string += "(" + str(den) + ")"
+                else:
+                    final_string += str(den)
+        return final_string
 
 
 class sin(parentFunction):
@@ -517,8 +686,11 @@ debug = False
 if __name__ == "__main__":
 
     x = Variable()
-    a = add(1, x)
-    print(add(2, a(add(1, x))))
+    a = div(1, mul(x, x))
+    b = div(div(2, 3), mul(div(x, 2), x))
+    print(b)
+    # print(b(afunction_callfunction_call(c)))
+# >>>>>>> 7d2df42dcb96264696dc7bddb085c8b43e4d729c
 # bugs:
 """
 DONE recursive adding of same function returns None
