@@ -158,9 +158,15 @@ class add(parentFunction):
                         dummy += 1
                         no_of_same_func_dict.add(str(obj), dummy)
 
-                for j in range(i, len(args)):
+                for j, obj2 in enumerate(args[i + 1 : -1]):
                     # check if the same identical function is present:
-                    pass
+                    if (
+                        isinstance(obj2, type(obj))
+                        and all(elem in obj2.init_args for elem in obj.init_args)
+                        and all(elem in obj.init_args for elem in obj2.init_args)
+                    ):
+                        print(obj, obj2, "a")
+
         print(no_of_same_func_dict)
 
     def __stre__(self, *args):
@@ -433,9 +439,17 @@ class mul(parentFunction):
         self.str_args = None
         self.call_arg = None
 
+        class custom_dictionary(dict):
+            def __init__(self):
+                self = dict()
+
+            def add(self, key, value):
+                self[key] = value
+
     def function_call(self, *args):
         args = args[0]
         numres = 1
+        no_of_same_func_dict = custom_dictionary()
         for i, obj in enumerate(args):
 
             if isinstance(obj, numbers.Number):
@@ -503,8 +517,8 @@ debug = False
 if __name__ == "__main__":
 
     x = Variable()
-    a = mul(1, 2, 3)
-    print(add(1, x))
+    a = add(1, x)
+    print(add(2, a(add(1, x))))
 # bugs:
 """
 DONE recursive adding of same function returns None
