@@ -3,20 +3,6 @@ import sys
 from numbers import Number as number
 
 
-def listed_nest_remover(l):
-    nested_list_dummy = []
-
-    def list_nested_remover_2(l):
-        for i in l:
-            if isinstance(i, list):
-                list_nested_remover_2(i)
-            else:
-                nested_list_dummy.append(i)
-
-    list_nested_remover_2(l)
-    return nested_list_dummy
-
-
 class Variable:
     def __init__(self, name=""):
         try:
@@ -36,6 +22,7 @@ class parentFunction:
         self.init_structure = list(init_structure)
 
     def __call__(self, *args):
+        print("hd")
         call_arg = args[0]
 
         if isinstance(call_arg, Variable):
@@ -128,6 +115,7 @@ class mul(parentFunction):
 class div(parentFunction):
     def call(self, *args):
         args = args[0]
+        print(args)
         assert len(args) == 2, "div takes two arguments a,b -> a/b"
         return args[0] / args[1]
 
@@ -186,6 +174,26 @@ class sqrt(parentFunction):
             sys.exit(1)
 
 
+class summation(parentFunction):
+    def call(self, *args):
+        print("df")
+        # the calling of sum is as follows:
+        # sum(sum_var, bottom_val, top_val, sum_func)
+        args = args[0]
+        assert (
+            len(args) == 4
+        ), "the calling of sum is as follows: sum(sum_var, bottom_val, top_val, sum_func)"
+        sum_var, bottom_val, top_val, sum_func = args
+        assert isinstance(sum_var, Variable), 'sum_var is not of instance "Variable"'
+        assert isinstance(bottom_val, int), "bottom_val is not an integer"
+        assert isinstance(top_val, int), "top_val is not an integer"
+        assert isinstance(sum_func, parentFunction), "sum_func is not a function"
+        res = 0
+        for i in range(bottom_val, top_val + 1):
+            res += sum_func(i)
+        return res
+
+
 if __name__ == "__main__":
     x = Variable("x")
     f = add(x, x, x, 2, 4, mul(x, x))
@@ -197,3 +205,8 @@ if __name__ == "__main__":
     # tan = div(sin(x), cos(x))
     # t = sqrt(add(1, mul(-1, tan(x))))
     # print(t(2))
+    x = Variable
+    n = Variable
+
+    k = summation()
+    print(k(n, 1, 100, add(1, n)))
