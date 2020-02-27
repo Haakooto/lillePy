@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from numbers import Number as number
 
 
@@ -17,13 +18,22 @@ def listed_nest_remover(l):
 
 
 class Variable:
-    def __init__(self, *args):
-        pass
+    def __init__(self, name=""):
+        try:
+            float(name)
+        except ValueError:
+            self.name = str(name)
+        else:
+            print("Invalid variable name given, can not be number")
+            sys.exit()
+
+    def __str__(self):
+        return self.name
 
 
 class parentFunction:
     def __init__(self, *init_structure):
-        self.init_structure = init_structure
+        self.init_structure = list(init_structure)
 
     def __call__(self, *args):
         call_arg = args[0]
@@ -52,6 +62,12 @@ class parentFunction:
 
         return init_structure_variables_replaced
 
+    def __str__(self):
+        if "string" in dir(self):
+            return self.string()
+        else:
+            print(f"Printing has not yet been implemented here")
+
 
 class add(parentFunction):
     def call(self, *args):
@@ -59,6 +75,38 @@ class add(parentFunction):
         for obj in args[0]:
             res += obj
         return res
+
+    def string(self):
+        """
+        Slengte sammen en rask stringer for add.
+        Den er veldig spesialisert, og vil ikke lett kunne utvides til annet.
+        Må bruke litt mer tid på det.
+        Er for sulten til å gjøre noe med det akuratt nå :)
+        """
+        resdic = {"number": 0}
+        structure = self.init_structure
+
+        while structure != []:
+            obj = structure[0]
+
+            if isinstance(obj, Variable):
+                if str(obj) not in resdic:
+                    resdic[str(obj)] = 1
+                else:
+                    resdic[str(obj)] += 1
+            elif isinstance(obj, number):
+                resdic["number"] += obj
+
+            structure = structure[1:]
+
+        res = ""
+        for thing, num in resdic.items():
+            if thing == "number" and num != 0:
+                res += f"{num} + "
+            else:
+                res += f"{num}{thing} + "
+
+        return res[:-3]
 
 
 class sub(parentFunction):
@@ -139,11 +187,13 @@ class sqrt(parentFunction):
 
 
 if __name__ == "__main__":
-    x = Variable()
-    a = cos(x)
-    b = sin(x)
-    s = sin(x)
-    c = cos(x)
-    tan = div(sin(x), cos(x))
-    t = sqrt(add(1, mul(-1, tan(x))))
-    print(t(2))
+    x = Variable("x")
+    f = add(x, x, x, 2, 4, mul(x, x))
+    print(f)
+    # a = cos(x)
+    # b = sin(x)
+    # s = sin(x)
+    # c = cos(x)
+    # tan = div(sin(x), cos(x))
+    # t = sqrt(add(1, mul(-1, tan(x))))
+    # print(t(2))
