@@ -18,11 +18,14 @@ class Variable:
 
 
 class parentFunction:
+    arglen = None
+    arg_example = "this is a bug!"  # Should be set if arglen is not None
+
     def __init__(self, *init_structure):
         self.init_structure = list(init_structure)
+        self.validate_init_structure()
 
     def __call__(self, *args):
-        print("hd")
         call_arg = args[0]
 
         if isinstance(call_arg, Variable):
@@ -49,6 +52,19 @@ class parentFunction:
 
         return init_structure_variables_replaced
 
+    def validate_init_structure(self):
+        n = len(self.init_structure)
+        if self.arglen is not None:
+            msg = (
+                f"{self.__class__} takes {self.arglen} arguments, but {n} were given. "
+            )
+            for l in range(97, 97 + self.arglen):
+                msg += f"{chr(l)},"
+            msg = msg[:-1] + " -> " + self.arg_example
+            assert n == self.arglen, msg
+        else:
+            assert n > 1, f"{self.__class__} takes at least two arguments"
+
     def __str__(self):
         if "string" in dir(self):
             return self.string()
@@ -57,6 +73,8 @@ class parentFunction:
 
 
 class add(parentFunction):
+    arglen = None
+
     def call(self, *args):
         res = 0
         for obj in args[0]:
@@ -97,6 +115,9 @@ class add(parentFunction):
 
 
 class sub(parentFunction):
+    arglen = 2
+    arg_example = "a - b"
+
     def call(self, *args):
         args = args[0]
         assert len(args) == 2, "sub takes two arguments a,b -> a - b"
@@ -104,6 +125,8 @@ class sub(parentFunction):
 
 
 class mul(parentFunction):
+    arglen = None
+
     def call(self, *args):
         args = args[0]
         res = 1
@@ -113,14 +136,19 @@ class mul(parentFunction):
 
 
 class div(parentFunction):
+    arglen = 2
+    arg_example = "a / b"
+
     def call(self, *args):
         args = args[0]
-        print(args)
-        assert len(args) == 2, "div takes two arguments a,b -> a/b"
+        # assert len(args) == 2, "div takes two arguments a,b -> a/b"
         return args[0] / args[1]
 
 
 class cos(parentFunction):
+    arglen = 1
+    arg_example = "cos(a)"
+
     def call(self, *args):
         arg = args[0]
         assert len(arg) == 1, "cos takes 1 argument a -> cos(a)"
@@ -128,6 +156,9 @@ class cos(parentFunction):
 
 
 class sin(parentFunction):
+    arglen = 1
+    arg_example = "sin(a)"
+
     def call(self, *args):
         arg = args[0]
         assert len(arg) == 1, "sin takes 1 argument a -> sin(a)"
@@ -135,6 +166,9 @@ class sin(parentFunction):
 
 
 class ln(parentFunction):
+    arglen = 1
+    arg_example = "ln(a)"
+
     def call(self, *args):
         arg = args[0]
         assert len(arg) == 1, "ln takes 1 argument a -> ln(a)"
@@ -142,6 +176,9 @@ class ln(parentFunction):
 
 
 class log(parentFunction):
+    arglen = 1
+    arg_example = "log(a)"
+
     def call(self, *args):
         arg = args[0]
         assert len(arg) == 1, "log takes 1 argument a -> log(a)"
@@ -149,6 +186,9 @@ class log(parentFunction):
 
 
 class pow(parentFunction):
+    arglen = 2
+    arg_example = "a^b"
+
     def call(self, *args):
         args = args[0]
         assert len(args) == 2, "pow takes two arguments a,b -> a^b"
@@ -162,6 +202,9 @@ class pow(parentFunction):
 
 
 class sqrt(parentFunction):
+    arglen = 1
+    arg_example = "sqrt(a)"
+
     def call(self, *args):
         args = args[0]
         assert len(args) == 1, "pow takes one argument a -> sqrt(a)"
@@ -175,6 +218,8 @@ class sqrt(parentFunction):
 
 
 class summation(parentFunction):
+    arglen = None
+
     def call(self, *args):
         print("df")
         # the calling of sum is as follows:
@@ -196,8 +241,9 @@ class summation(parentFunction):
 
 if __name__ == "__main__":
     x = Variable("x")
-    f = add(x, x, x, 2, 4, mul(x, x))
-    print(f)
+    f = add(x, x, x, 2, 4)
+    g = div(1, 2)
+
     # a = cos(x)
     # b = sin(x)
     # s = sin(x)
@@ -205,8 +251,8 @@ if __name__ == "__main__":
     # tan = div(sin(x), cos(x))
     # t = sqrt(add(1, mul(-1, tan(x))))
     # print(t(2))
-    x = Variable
-    n = Variable
+    # x = Variable
+    # n = Variable
 
-    k = summation()
-    print(k(n, 1, 100, add(1, n)))
+    # k = summation()
+    # print(k(n, 1, 100, add(1, n)))
