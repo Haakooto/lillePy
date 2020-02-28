@@ -16,6 +16,9 @@ class Variable:
     def __str__(self):
         return self.name
 
+    def string(self, type):
+        return self.name
+
 
 class parentFunction:
     arglen = None
@@ -23,27 +26,30 @@ class parentFunction:
 
     def __init__(self, *init_structure):
         self.init_structure = list(init_structure)
+        self.call_arg = None
         self.validate_init_structure()
+
+        # the following is a bugfix that enables layering of anonymous functions
         for i, obj in enumerate(self.init_structure):
             if isinstance(obj, parentFunction):
                 if (
                     False
                     in [isinstance(substruc, number) for substruc in obj.init_structure]
                 ) is False:
-                    # This is TRUE if theres a function in the init_sctructure that only has
+                    # This is TRUE if theres a function in the init_structure that only has
                     # numbers in its own init_structure. i.e it's a function with a numeric value
                     self.init_structure[i] = obj.call(obj.init_structure)
 
     def __call__(self, *args):
-        call_arg = args[0]
+        self.call_arg = args[0]
 
-        if isinstance(call_arg, Variable):
+        if isinstance(self.call_arg, Variable):
             return self
-        elif isinstance(call_arg, number):
+        elif isinstance(self.call_arg, number):
             assert len(args) == 1, "Only takes 1 input"
-            call_arg = args[0]
+            self.call_arg = args[0]
             init_structure_variables_replaced = self.replace_variables_with_number(
-                call_arg
+                self.call_arg
             )
 
             return self.call(init_structure_variables_replaced)
@@ -74,11 +80,22 @@ class parentFunction:
         else:
             assert n > 1, f"{self.__class__} takes at least two arguments"
 
+    def init_structure_are_numbers(self):
+        # returns True if all the values in init_structure are numbers
+        return (
+            False in [isinstance(obj, number) for obj in self.init_structure]
+        ) is False
+
     def __str__(self):
         if "string" in dir(self):
-            return self.string()
+            if self.init_structure_are_numbers():
+                return f"{self.call(self.init_structure)}"
+            else:
+                # return self.string(str(self.init_structure[0].string("variablic")))
+                return self.string(str(self.init_structure[0]))
+
         else:
-            print(f"Printing has not yet been implemented here")
+            return f"this has not yet been implemented"
 
 
 class add(parentFunction):
@@ -90,7 +107,7 @@ class add(parentFunction):
             res += obj
         return res
 
-    def string(self):
+    def string(self, *args):
         """
         Slengte sammen en rask stringer for add.
         Den er veldig spesialisert, og vil ikke lett kunne utvides til annet.
@@ -163,6 +180,9 @@ class cos(parentFunction):
         assert len(arg) == 1, "cos takes 1 argument a -> cos(a)"
         return np.cos(arg[0])
 
+    def string(self, string_arg):
+        return f"cos({string_arg})"
+
 
 class sin(parentFunction):
     arglen = 1
@@ -172,6 +192,9 @@ class sin(parentFunction):
         arg = args[0]
         assert len(arg) == 1, "sin takes 1 argument a -> sin(a)"
         return np.sin(arg[0])
+
+    def string(self, string_arg):
+        return f"sin({string_arg})"
 
 
 class ln(parentFunction):
@@ -183,15 +206,8 @@ class ln(parentFunction):
         assert len(arg) == 1, "ln takes 1 argument a -> ln(a)"
         return np.log(arg[0])
 
-
-class log(parentFunction):
-    arglen = 1
-    arg_example = "log(a)"
-
-    def call(self, *args):
-        arg = args[0]
-        assert len(arg) == 1, "log takes 1 argument a -> log(a)"
-        return np.log10(arg[0])
+    def string(self, string_arg):
+        return f"ln({string_arg})"
 
 
 class pow(parentFunction):
@@ -225,34 +241,17 @@ class sqrt(parentFunction):
 
             sys.exit(1)
 
-
-class summation(parentFunction):
-    arglen = None
-
-    def call(self, *args):
-        print("df")
-        # the calling of sum is as follows:
-        # sum(sum_var, bottom_val, top_val, sum_func)
-        args = args[0]
-        assert (
-            len(args) == 4
-        ), "the calling of sum is as follows: sum(sum_var, bottom_val, top_val, sum_func)"
-        sum_var, bottom_val, top_val, sum_func = args
-        assert isinstance(sum_var, Variable), 'sum_var is not of instance "Variable"'
-        assert isinstance(bottom_val, int), "bottom_val is not an integer"
-        assert isinstance(top_val, int), "top_val is not an integer"
-        assert isinstance(sum_func, parentFunction), "sum_func is not a function"
-        res = 0
-        for i in range(bottom_val, top_val + 1):
-            res += sum_func(i)
-        return res
+    def string(self, string_arg):
+        return f"sqrt({string_arg})"
 
 
 if __name__ == "__main__":
     x = Variable("x")
-    j = add(1, 2)
 
-    print(add(1, add(1, add(8, 9))))
+    j = add(1, x)
+    k = sin(sin(x))
+    print(sqrt(sin(add(1, x))))
+
     # a = cos(x)
     # b = sin(x)
     # s = sin(x)
