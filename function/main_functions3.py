@@ -24,6 +24,15 @@ class parentFunction:
     def __init__(self, *init_structure):
         self.init_structure = list(init_structure)
         self.validate_init_structure()
+        for i, obj in enumerate(self.init_structure):
+            if isinstance(obj, parentFunction):
+                if (
+                    False
+                    in [isinstance(substruc, number) for substruc in obj.init_structure]
+                ) is False:
+                    # This is TRUE if theres a function in the init_sctructure that only has
+                    # numbers in its own init_structure. i.e it's a function with a numeric value
+                    self.init_structure[i] = obj.call(obj.init_structure)
 
     def __call__(self, *args):
         call_arg = args[0]
@@ -241,9 +250,9 @@ class summation(parentFunction):
 
 if __name__ == "__main__":
     x = Variable("x")
-    f = add(x, x, x, 2, 4)
-    g = div(1, 2)
+    j = add(1, 2)
 
+    print(add(1, add(1, add(8, 9))))
     # a = cos(x)
     # b = sin(x)
     # s = sin(x)
