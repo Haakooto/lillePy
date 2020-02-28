@@ -232,6 +232,5 @@ I = Interpreter(expression)
 print(I)
 # print(I.constructor)
 # a = I.split_at_add()
-# print(a)
+print(I.split_at_add())
 # print(I.constructor_type)
-

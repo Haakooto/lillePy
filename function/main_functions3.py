@@ -87,15 +87,18 @@ class parentFunction:
         ) is False
 
     def __str__(self):
+
         if "string" in dir(self):
             if self.init_structure_are_numbers():
                 return f"{self.call(self.init_structure)}"
             else:
-                # return self.string(str(self.init_structure[0].string("variablic")))
-                return self.string(str(self.init_structure[0]))
+                if len(self.init_structure) == 1:
+                    return self.string(str(self.init_structure[0]))
+                else:
+                    return self.string([str(obj) for obj in self.init_structure])
 
         else:
-            return f"this has not yet been implemented"
+            return f"this function does not have string support yet"
 
 
 class add(parentFunction):
@@ -225,6 +228,10 @@ class pow(parentFunction):
 
             sys.exit(1)
 
+    def string(self, string_arg):
+
+        return f"{string_arg[0]}^{string_arg[1]}"
+
 
 class sqrt(parentFunction):
     arglen = 1
@@ -248,19 +255,5 @@ class sqrt(parentFunction):
 if __name__ == "__main__":
     x = Variable("x")
 
-    j = add(1, x)
-    k = sin(sin(x))
-    print(sqrt(sin(add(1, x))))
-
-    # a = cos(x)
-    # b = sin(x)
-    # s = sin(x)
-    # c = cos(x)
-    # tan = div(sin(x), cos(x))
-    # t = sqrt(add(1, mul(-1, tan(x))))
-    # print(t(2))
-    # x = Variable
-    # n = Variable
-
-    # k = summation()
-    # print(k(n, 1, 100, add(1, n)))
+    k = mul(1, 2, 3, x, x)
+    print(k(2))

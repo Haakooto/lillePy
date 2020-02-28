@@ -4,8 +4,16 @@ if __name__ == "__main__":
     from custom_functions import *
 import numpy as np
 
+from main_functions2 import add
 
-class add(parentFunctions):
+
+class parentFunctions:
+    def __init__(self):
+        pass
+
+
+"""
+class add1(parentFunctions):
     # because iwant to add stuff
     def __init__(self, *passed):
 
@@ -44,6 +52,8 @@ class add(parentFunctions):
                     elif isinstance(obj, Variable):
                         sum += arg
                 return sum
+
+"""
 
 
 class sub(parentFunctions):

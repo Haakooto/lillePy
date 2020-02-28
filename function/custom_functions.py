@@ -1,12 +1,12 @@
 from interpreter_bror import *
-from main_functions import *
+from main_functions2 import *
 import write_manager as wm
 
 if __name__ == "__main__":
     from main_functions import *
 
 
-class customFunction(parentFunctions):
+class customFunction(parentFunction):
     def __init__(self, *passed, name="None"):
         self.function_name = name
         self.passed = listed_nest_remover(list(passed))
@@ -22,7 +22,7 @@ class customFunction(parentFunctions):
             if isinstance(arg, Variable):
                 return self
             else:
-                return self.passed[0](arg)
+                return eval(self.passed[0])(arg)
 
     def write_function(self):
         """
