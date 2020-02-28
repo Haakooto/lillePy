@@ -36,8 +36,7 @@ class add(parentFunction):
                     resdic[obj] += 1
                 for obj2 in resdic:
                     pass
-                    # if obj.check_if_equal_function(obj2):
-                    #    resdic[obj] += 1
+
             structure = structure[1:]
 
         res = ""
