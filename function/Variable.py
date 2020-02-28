@@ -10,7 +10,7 @@ class Variable:
             sys.exit()
 
     def __str__(self):
-        return self.name
+        return self.string(None)
 
     def string(self, type):
         return self.name

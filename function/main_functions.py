@@ -2,23 +2,7 @@ import numpy as np
 import sys
 from numbers import Number as number
 from parentFunction import parentFunction
-
-
-class Variable:
-    def __init__(self, name=""):
-        try:
-            float(name)
-        except ValueError:
-            self.name = str(name)
-        else:
-            print("Invalid variable name given, can not be number")
-            sys.exit()
-
-    def __str__(self):
-        return self.name
-
-    def string(self, type):
-        return self.name
+from Variable import Variable
 
 
 class add(parentFunction):
@@ -31,12 +15,7 @@ class add(parentFunction):
         return res
 
     def string(self, *args):
-        """
-        Slengte sammen en rask stringer for add.
-        Den er veldig spesialisert, og vil ikke lett kunne utvides til annet.
-        Må bruke litt mer tid på det.
-        Er for sulten til å gjøre noe med det akuratt nå :)
-        """
+
         resdic = {"number": 0}
         structure = self.init_structure
 
@@ -44,13 +23,21 @@ class add(parentFunction):
             obj = structure[0]
 
             if isinstance(obj, Variable):
-                if str(obj) not in resdic:
-                    resdic[str(obj)] = 1
+                if obj not in resdic:
+                    resdic[obj] = 1
                 else:
-                    resdic[str(obj)] += 1
+                    resdic[obj] += 1
             elif isinstance(obj, number):
                 resdic["number"] += obj
-
+            elif isinstance(obj, parentFunction):
+                if obj not in resdic:
+                    resdic[obj] = 1
+                else:
+                    resdic[obj] += 1
+                for obj2 in resdic:
+                    pass
+                    # if obj.check_if_equal_function(obj2):
+                    #    resdic[obj] += 1
             structure = structure[1:]
 
         res = ""
@@ -58,7 +45,10 @@ class add(parentFunction):
             if thing == "number" and num != 0:
                 res += f"{num} + "
             else:
-                res += f"{num}{thing} + "
+                if num != 1:
+                    res += f"{num}{str(thing)} + "
+                else:
+                    res += f"{str(thing)}"
 
         return res[:-3]
 
@@ -82,6 +72,37 @@ class mul(parentFunction):
         for obj in args:
             res *= obj
         return res
+
+    def string(self, *args):
+        resdic = {"number": 0}
+        structure = self.init_structure
+
+        while structure != []:
+            obj = structure[0]
+
+            if isinstance(obj, Variable) or isinstance(obj, parentFunction):
+                if obj not in resdic:
+                    resdic[obj] = 1
+                else:
+                    resdic[obj] += 1
+            elif isinstance(obj, number):
+                resdic["number"] += obj
+
+            structure = structure[1:]
+
+        res = ""
+        for thing, num in resdic.items():
+            if thing == "number" and num != 1:
+                res += f"{num} * "
+            else:
+                if num != 1:
+
+                    res += f"{str(thing)}^{num} * "
+                else:
+
+                    res += f"{str(thing)} * "
+
+        return res[:]
 
 
 class div(parentFunction):
@@ -162,5 +183,5 @@ class sqrt(parentFunction):
 if __name__ == "__main__":
     x = Variable("x")
 
-    k = mul(1, 2, 3, x, x)
-    print(pow(-1, 0.2))
+    k = mul(1, 2, x, x, sin(x), sin(x))
+    print(mul(2, sin(x)))
