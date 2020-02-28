@@ -1,271 +1,166 @@
-from interpreter_bror import *
-
-if __name__ == "__main__":
-    from custom_functions import *
 import numpy as np
-
-from main_functions2 import add
-
-
-class parentFunctions:
-    def __init__(self):
-        pass
+import sys
+from numbers import Number as number
+from parentFunction import parentFunction
 
 
-"""
-class add1(parentFunctions):
-    # because iwant to add stuff
-    def __init__(self, *passed):
-
-        self.function_name = "add"
-        self.passed = listed_nest_remover(list(passed))
-        for i, obj in enumerate(passed):
-            if obj == "x":
-                obj = Variable("x")
-                self.passed[i] = obj
-            if isinstance(obj, add):
-                self.passed = add(self.passed + obj.passed).passed  # [0]
-        for i, obj in enumerate(self.passed):
-            if isinstance(obj, add):
-                del self.passed[i]
-        # this will check if the function is actually a function or just a number,
-        # i.e cos(x) vs cos(2)
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
+class Variable:
+    def __init__(self, name=""):
+        try:
+            float(name)
+        except ValueError:
+            self.name = str(name)
         else:
-            self.variable = None
+            print("Invalid variable name given, can not be number")
+            sys.exit()
 
-    def __call__(self, *args):
-        # for now only one variable is allowed
-        if len(args) == 1:
-            arg = args[0]
+    def __str__(self):
+        return self.name
 
-            if isinstance(arg, Variable):
-                pass
-            elif isinstance(arg, numbers.Number):
-                sum = 0
-                for obj in self.passed:
-                    if isinstance(obj, parentFunctions):
-                        sum += obj(arg)
-                    if isinstance(obj, numbers.Number):
-                        sum += obj
-                    elif isinstance(obj, Variable):
-                        sum += arg
-                return sum
-
-"""
+    def string(self, type):
+        return self.name
 
 
-class sub(parentFunctions):
-    # because iwant to sub stuff
-    def __init__(self, *passed):
+class add(parentFunction):
+    arglen = None
 
-        self.function_name = "sub"
-        self.passed = listed_nest_remover(list(passed))
-        for i, obj in enumerate(passed):
-            if obj == "x":
-                obj = Variable("x")
-                self.passed[i] = obj
-            if isinstance(obj, sub):
-                self.passed = sub(self.passed + obj.passed).passed
-        for i, obj in enumerate(self.passed):
-            if isinstance(obj, sub):
-                del self.passed[i]
-        # this will check if the function is actually a function or just a number,
-        # i.e cos(x) vs cos(2)
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
-        else:
-            self.variable = None
+    def call(self, *args):
+        res = 0
+        for obj in args[0]:
+            res += obj
+        return res
 
-    def __call__(self, *args):
-        # for now only one variable is allowed
-        if len(args) == 1:
-            arg = args[0]
+    def string(self, *args):
+        """
+        Slengte sammen en rask stringer for add.
+        Den er veldig spesialisert, og vil ikke lett kunne utvides til annet.
+        Må bruke litt mer tid på det.
+        Er for sulten til å gjøre noe med det akuratt nå :)
+        """
+        resdic = {"number": 0}
+        structure = self.init_structure
 
-            if isinstance(arg, Variable):
-                pass
-            elif isinstance(arg, numbers.Number):
-                sum = 0
-                for obj in self.passed:
-                    if isinstance(obj, parentFunctions):
-                        sum -= obj(arg)
-                    if isinstance(obj, numbers.Number):
-                        sum -= obj
-                    elif isinstance(obj, Variable):
-                        sum -= arg
-                return sum
+        while structure != []:
+            obj = structure[0]
 
+            if isinstance(obj, Variable):
+                if str(obj) not in resdic:
+                    resdic[str(obj)] = 1
+                else:
+                    resdic[str(obj)] += 1
+            elif isinstance(obj, number):
+                resdic["number"] += obj
 
-class mul(parentFunctions):
-    def __init__(self, *passed):
-        self.function_name = "mul"
-        self.passed = listed_nest_remover(list(passed))
-        for i, obj in enumerate(passed):
-            if obj == "x":
-                obj = Variable("x")
-                self.passed[i] = obj
-            if isinstance(obj, mul):
-                self.passed = mul(self.passed + obj.passed).passed  # [0]
-        for i, obj in enumerate(self.passed):
-            if isinstance(obj, mul):
-                del self.passed[i]
-        # this will check if the function is actually a function or just a number,
-        # i.e cos(x) vs cos(2)
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
-        else:
-            self.variable = None
+            structure = structure[1:]
 
-    def __call__(self, *args):
-        # for now only one variable is allowed
-        if len(args) == 1:
-            arg = args[0]
+        res = ""
+        for thing, num in resdic.items():
+            if thing == "number" and num != 0:
+                res += f"{num} + "
+            else:
+                res += f"{num}{thing} + "
 
-            if isinstance(arg, Variable):
-                pass
-            elif isinstance(arg, numbers.Number):
-                prod = 1
-                for obj in self.passed:
-                    if isinstance(obj, parentFunctions):
-                        prod *= obj(arg)
-                    if isinstance(obj, numbers.Number):
-                        prod *= obj
-                    elif isinstance(obj, Variable):
-                        prod *= arg
-                return prod
+        return res[:-3]
 
 
-class div(parentFunctions):
-    def __init__(self, *passed):
-        self.function_name = "div"
-        self.passed = listed_nest_remover(list(passed))
-        for i, obj in enumerate(passed):
-            if obj == "x":
-                obj = Variable("x")
-                self.passed[i] = obj
-            if isinstance(obj, div):
-                self.passed = div(self.passed + obj.passed).passed  # [0]
-        for i, obj in enumerate(self.passed):
-            if isinstance(obj, div):
-                del self.passed[i]
-        # this will check if the function is actually a function or just a number,
-        # i.e cos(x) vs cos(2)
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
-        else:
-            self.variable = None
-        """If something goes wrong here, try to enable the below commment"""
-        # self(1)
+class sub(parentFunction):
+    arglen = 2
+    arg_example = "a - b"
 
-    def __call__(self, *args):
-        # for now only one variable is allowed
-        if len(args) == 1:
-            arg = args[0]
-
-            if isinstance(arg, numbers.Number):
-                res = 1
-                try:
-                    for i, obj in enumerate(self.passed):
-                        if isinstance(obj, parentFunctions):
-                            res *= obj(arg) ** ((-1) ** i)
-
-                        if isinstance(obj, numbers.Number):
-                            res *= (obj) ** ((-1) ** i)
-
-                        elif isinstance(obj, Variable):
-                            res *= (arg) ** ((-1) ** i)
-                except ZeroDivisionError:
-                    print("Error, division by zero")
-                    return None
-                return res
+    def call(self, *args):
+        args = args[0]
+        assert len(args) == 2, "sub takes two arguments a,b -> a - b"
+        return args[0] - args[1]
 
 
-class cos(parentFunctions):
-    def __init__(self, *args):
-        self.function_name = "cos"
-        assert len(args) == 1, "cos() takes only one argument. %i given." % len(args)
-        self.passed = args[0]
-        # this will check if the function is actually a function or just a number,
-        # i.e cos(x) vs cos(2)
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
-        else:
-            self.variable = None
-        self.call_exact = (
-            True  # decides wheter function will print 3.1415 instead of pi
-        )
+class mul(parentFunction):
+    arglen = None
 
-    def __call__(self, *args):
-        if len(args) == 1:
-            arg = args[0]
-            res = None
-
-            if isinstance(self.passed, parentFunctions):
-                res = np.cos(self.passed(arg))
-            elif isinstance(self.passed, numbers.Number) or isinstance(
-                self.passed, Variable
-            ):
-                res = np.cos(arg)
-            return res
+    def call(self, *args):
+        args = args[0]
+        res = 1
+        for obj in args:
+            res *= obj
+        return res
 
 
-class sin(parentFunctions):
-    def __init__(self, *args):
-        self.function_name = "sin"
-        assert len(args) == 1, "sin() takes only one argument. %i given." % len(args)
-        self.passed = args[0]
-        # this will check if the function is actually a function or just a number,
-        # i.e cos(x) vs cos(2)
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
-        else:
-            self.variable = None
-        self.call_exact = False
+class div(parentFunction):
+    arglen = 2
+    arg_example = "a / b"
 
-    def __call__(self, *args):
-
-        if len(args) == 1:
-            arg = args[0]
-            res = None
-
-            if isinstance(self.passed, parentFunctions):
-                res = np.sin(self.passed(arg))
-            elif isinstance(self.passed, numbers.Number) or isinstance(
-                self.passed, Variable
-            ):
-                res = np.sin(arg)
-            return res
+    def call(self, *args):
+        args = args[0]
+        # assert len(args) == 2, "div takes two arguments a,b -> a/b"
+        return args[0] / args[1]
 
 
-class ln(parentFunctions):
-    def __init__(self, *args):
-        self.function_name = "ln"
-        assert len(args) == 1, "ln() takes only one argument. &i given" & len(args)
-        self.passed = args[0]
-        if isinstance(self.passed, Variable):
-            self.variable = self.passed
-        else:
-            self.variable = None
-        self.call_exact = True
+class cos(parentFunction):
+    arglen = 1
+    arg_example = "cos(a)"
 
-    def __call__(self, *args):
+    def call(self, *args):
+        arg = args[0]
+        assert len(arg) == 1, "cos takes 1 argument a -> cos(a)"
+        return np.cos(arg[0])
 
-        if len(args) == 1:
-            arg = args[0]
-            res = None
+    def string(self, string_arg):
+        return f"cos({string_arg})"
 
-            if isinstance(self.passed, parentFunctions):
-                res = np.log(self.passed(arg))
-            elif isinstance(self.passed, numbers.Number) or isinstance(
-                self.passed, Variable
-            ):
-                res = np.log(arg)
-            return res
+
+class sin(parentFunction):
+    arglen = 1
+    arg_example = "sin(a)"
+
+    def call(self, *args):
+        arg = args[0]
+        assert len(arg) == 1, "sin takes 1 argument a -> sin(a)"
+        return np.sin(arg[0])
+
+    def string(self, string_arg):
+        return f"sin({string_arg})"
+
+
+class ln(parentFunction):
+    arglen = 1
+    arg_example = "ln(a)"
+
+    def call(self, *args):
+        arg = args[0]
+        assert len(arg) == 1, "ln takes 1 argument a -> ln(a)"
+        return np.log(arg[0])
+
+    def string(self, string_arg):
+        return f"ln({string_arg})"
+
+
+class pow(parentFunction):
+    arglen = 2
+    arg_example = "a^b"
+
+    def call(self, *args):
+        args = args[0]
+        assert len(args) == 2, "pow takes two arguments a,b -> a^b"
+        return args[0] ** args[1]
+
+    def string(self, string_arg):
+        return f"{string_arg[0]}^{string_arg[1]}"
+
+
+class sqrt(parentFunction):
+    arglen = 1
+    arg_example = "sqrt(a)"
+
+    def call(self, *args):
+        args = args[0]
+        assert len(args) == 1, "pow takes one argument a -> sqrt(a)"
+        return args[0] ** (1 / 2)
+
+    def string(self, string_arg):
+        return f"sqrt({string_arg})"
 
 
 if __name__ == "__main__":
     x = Variable("x")
 
-    obj = sin(ln(2))
-    print(obj)
+    k = mul(1, 2, 3, x, x)
+    print(pow(-1, 0.2))
