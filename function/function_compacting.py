@@ -1,6 +1,7 @@
 from main_functions import *
 from Variable import Variable
 from parentFunction import parentFunction
+from sympy import primefactors
 
 
 class Compaction:
@@ -61,6 +62,38 @@ class Compaction:
             new_init_structure[0] = mul(new_init_structure[0], obj2.init_structure[1])
             new_init_structure[1] = mul(new_init_structure[1], obj2.init_structure[0])
 
+    def factorize_variables_in_divisions(self):
+        # this supports multiple variables.
+        # This will remove any variables that are in the enumerator and denominator in
+        # a division. Recomended ot use after reorder_div_elements()
+        assert (
+            self.init_function.__class__ == div
+        ), f'expected funciton fype "div", got {self.init_function.__class__}'
+        # For now this only works with mul() elements in the denominator and enumerator
+        for a in self.init_structure:
+            print(type(a))
+            multiply_numbers_in_mul(a)
+        enumerator, denominator = tuple(self.init_structure)[:]
+
+        if (isinstance(enumerator, mul)) and (isinstance(denominator, mul)):
+            for i, obj in enumerate(enumerator.init_structure):
+                if isinstance(obj, number):
+                    enumerator.init_structure[i] = primefactors(obj)
+            for i, obj in enumerate(enumerator.init_structure):
+                if isinstance(obj, number):
+                    enumerator.init_structure[i] = primefactors(obj)
+
+            for i in enumerator.init_structure[:]:
+                if i in denominator.init_structure:
+                    enumerator.init_structure.remove(i)
+                    denominator.init_structure.remove(i)
+            multiply_numbers_in_mul(enumerator)
+            multiply_numbers_in_mul(denominator)
+            self.init_structure = [
+                enumerator.init_structure,
+                denominator.init_structure,
+            ]
+
 
 def check_if_equal_functions(func1, func2):
     if isinstance(func1, parentFunction) == isinstance(func2, parentFunction) == True:
@@ -82,10 +115,26 @@ def check_if_equal_functions(func1, func2):
     return False
 
 
+def multiply_numbers_in_mul(func):
+    print(func.__class__, "as")
+    assert isinstance(func, mul), "excpected mul"
+    res = 1
+    for obj in func.init_structure[:]:
+        if isinstance(obj, number):
+
+            func.init_structure.remove(obj)
+            res *= obj
+
+    func.init_structure.append(res)
+
+
 if __name__ == "__main__":
+
     x = Variable("x")
-    j = div(add(1, 2), div(1, x))
+    o = Variable("o")
+    j = div(mul(1, 2, 3), mul(2, 3))
+    print(j(2))
     c = Compaction(j)
-    print(j(3))
-    c.reorder_div_elements()
-    print(j(3))
+    c.factorize_variables_in_divisions()
+
+    print(j)
