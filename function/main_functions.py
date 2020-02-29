@@ -113,6 +113,9 @@ class div(parentFunction):
         # assert len(args) == 2, "div takes two arguments a,b -> a/b"
         return args[0] / args[1]
 
+    def string(self, *args):
+        return "TEMPORARY DIV STRING"
+
 
 class cos(parentFunction):
     arglen = 1

@@ -48,6 +48,19 @@ class Compaction:
         self.init_function.init_structure = new_init_structure
         print(new_init_structure, new_init_structure[-1])
 
+    def reorder_div_elements(self):
+        new_init_structure = self.init_structure[:]
+        obj1, obj2 = tuple(self.init_structure)
+        assert (
+            self.init_function.__class__ == div
+        ), f'expected funciton fype "div", got {self.init_function.__class__}'
+        if isinstance(obj1, div):
+            new_init_structure[0] = obj1.init_structure[0]
+            new_init_structure[1] = mul(obj2, obj1.init_structure[1])
+        if isinstance(obj2, div):
+            new_init_structure[0] = mul(new_init_structure[0], obj2.init_structure[1])
+            new_init_structure[1] = mul(new_init_structure[1], obj2.init_structure[0])
+
 
 def check_if_equal_functions(func1, func2):
     if isinstance(func1, parentFunction) == isinstance(func2, parentFunction) == True:
@@ -56,7 +69,7 @@ def check_if_equal_functions(func1, func2):
         if func1 == func2:
             return True
         # the second case is if the function is of the same class and has same
-        # init_structur(e but are different instances)
+        # init_structure(but are different instances)
 
         if (func1.__class__ == func2.__class__) and (
             func1.init_structure == func2.init_structure
@@ -71,8 +84,8 @@ def check_if_equal_functions(func1, func2):
 
 if __name__ == "__main__":
     x = Variable("x")
-    j = mul(2, sin(x), sin(x))
+    j = div(add(1, 2), div(1, x))
     c = Compaction(j)
-
-    c.join_mul_elements()
-    print(j)
+    print(j(3))
+    c.reorder_div_elements()
+    print(j(3))
