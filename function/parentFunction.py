@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 from numbers import Number as number
+from Variable import Variable
+
 
 class parentFunction:
     arglen = None
@@ -35,7 +37,6 @@ class parentFunction:
             )
 
             return self.call(init_structure_variables_replaced)
-
 
     def __str__(self):
         if "string" in dir(self):

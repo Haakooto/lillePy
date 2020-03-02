@@ -17,7 +17,7 @@ class add(parentFunction):
     def string(self, *args):
 
         resdic = {"number": 0}
-        structure = self.init_structure
+        structure = self.structure
 
         while structure != []:
             obj = structure[0]
@@ -74,7 +74,7 @@ class mul(parentFunction):
 
     def string(self, *args):
         resdic = {"number": 0}
-        structure = self.init_structure
+        structure = self.structure
 
         while structure != []:
             obj = structure[0]
