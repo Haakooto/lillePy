@@ -184,6 +184,6 @@ class sqrt(parentFunction):
 
 if __name__ == "__main__":
     x = Variable("x")
-
+    a = add(1, 2)
     k = mul(1, 2, x, x, sin(x), sin(x))
     print(mul(2, sin(x)))
