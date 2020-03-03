@@ -1,6 +1,6 @@
-from main_functions import *
-from Variable import Variable
-from parentFunction import parentFunction
+from .main_functions import *
+from .Variable import Variable
+from .parentFunction import parentFunction
 from sympy import primefactors
 
 

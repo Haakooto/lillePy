@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 from numbers import Number as number
-from Variable import Variable
+from .Variable import Variable
 
 
 class parentFunction:
