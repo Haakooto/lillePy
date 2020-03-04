@@ -10,12 +10,12 @@ class parentFunction:
     null_value = 0  # default for add
 
     def __init__(self, *init_structure):
-        self.structure = Struct({"num": self.null_value})
+        self.structure = Struct({"number": self.null_value})
 
         for obj in init_structure:
             if isinstance(obj, Number):
-                self.structure["num"] = type(self).call(
-                    self, self.structure["num"], obj
+                self.structure["number"] = type(self).call(
+                    self, self.structure["number"], obj
                 )
             elif obj in self.structure:
                 self.structure[obj] += 1
@@ -41,8 +41,10 @@ class parentFunction:
 
         for thing, coeff in self.structure.items():
             if isinstance(thing, parentFunction):
+                # print("parent")
                 res = self.call(thing(kwargs), coeff=coeff, res=res)
             elif isinstance(thing, Variable):
+                # print("var")
                 if Variable in kwargs:
                     res = self.call(kwargs[thing], coeff=coeff, res=res)
                 else:
@@ -56,8 +58,11 @@ class parentFunction:
                     """
                     var = list(kwargs.values())[0]
                     res = self.call(var, coeff=coeff, res=res)
-            elif isinstance(thing, Number):
-                res = self.call(thing, coeff=coeff, res=res)
+            elif thing == "number":
+                # print("numnum")
+                res = self.call(coeff, res=res)
+
+        return res
 
     def __str__(self):
         return "YEETING: Youshua-Elizian Extra-Terrestrial Inpastic-Normalized Graphisoding"

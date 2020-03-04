@@ -9,6 +9,7 @@ class add(parentFunction):
     arglen = None
 
     def call(self, *args, **kwargs):
+        # print(args, kwargs)
         if "res" not in kwargs:
             res = self.null_value
         else:
@@ -18,9 +19,11 @@ class add(parentFunction):
         else:
             coeff = kwargs["coeff"]
         for obj in args:
-            res += obj
+            # print(res, "before")
+            res += obj * coeff
+            # print(res, "after")
 
-        return res * coeff
+        return res  # * coeff
 
     def string(self, *args):
         print("NOPE")
@@ -78,12 +81,16 @@ class mul(parentFunction):
     def call(self, *args, **kwargs):
         if "res" not in kwargs:
             res = self.null_value
+        else:
+            res = kwargs["res"]
         if "coeff" not in kwargs:
             coeff = 1
+        else:
+            coeff = kwargs["coeff"]
         for obj in args:
-            res *= obj
+            res *= obj ** coeff
 
-        return res ** coeff
+        return res  # ** coeff
 
     def string(self, *args):
         return "Yop"
