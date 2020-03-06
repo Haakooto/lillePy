@@ -2,6 +2,7 @@ import numpy as np
 import sys
 from numbers import Number
 from .Variable import Variable, Struct
+from .parentFunction import parentFunction
 
 
 class parentOperator:
@@ -31,15 +32,20 @@ class parentOperator:
         else:
             self.structure[obj] = 1
 
-    def __call__(self, **kwargs):
-        res = self.null_value
+    def __call__(self, *args):
 
+        res = self.null_value
+        arg = args[0]
+        if isinstance(arg, Variable):
+            return self
         for thing, coeff in self.structure.items():
-            if isinstance(thing, parentFunction):
-                res = self.call(thing(kwargs), coeff=coeff, res=res)
+            if isinstance(thing, parentOperator):
+                res = self.call(thing(arg), coeff=coeff, res=res)
+            elif isinstance(thing, parentFunction):
+                res = type(self)(thing(arg), res).structure["number"]
             elif isinstance(thing, Variable):
-                if Variable in kwargs:
-                    res = self.call(kwargs[thing], coeff=coeff, res=res)
+                if isinstance(arg, Variable):
+                    res = self.call(arg(thing), coeff=coeff, res=res)
                 else:
                     """
                     This is for multivariable functions where variables should be set in call
@@ -49,27 +55,29 @@ class parentOperator:
 
                     For now defaults all variables to value of first val in kwargs
                     """
-                    var = list(kwargs.values())[0]
+                    var = arg
                     res = self.call(var, coeff=coeff, res=res)
             elif thing == "number":
                 res = self.call(coeff, res=res)
         return res
 
     def __str__(self):
-        return "YEETING: Youshua-Elizian Extra-Terrestrial Inpastic-Normalized Graphisoding"
-        if "string" in dir(self):
-            if self.init_structure_are_numbers():
-                return f"{self.call(self.init_structure)}"
-            else:
-                if len(self.init_structure) == 1:
-                    return self.string(str(self.init_structure[0]))
-                else:
-                    return self.string([str(obj) for obj in self.init_structure])
-
-        else:
-            return f"this function does not have string support yet"
+        return self.string()
+        # return "YEETING: Youshua-Elizian Extra-Terrestrial Inpastic-Normalized Graphisoding"
+        # if "string" in dir(self):
+        #     if self.init_structure_are_numbers():
+        #         return f"{self.call(self.init_structure)}"
+        #     else:
+        #         if len(self.init_structure) == 1:
+        #             return self.string(str(self.init_structure[0]))
+        #         else:
+        #             return self.string([str(obj) for obj in self.init_structure])
+        #
+        # else:
+        #     return f"this function does not have string support yet"
 
     def validate_init_structure(self):
+        return True
         n = len(self.original_structure)
         if self.arglen is not None:
 
@@ -111,42 +119,28 @@ class add(parentOperator):
         return res
 
     def string(self, *args):
-        print("NOPE")
-        return "Leslie"
-        resdic = {"number": 0}
-        structure = self.init_structure
-
-        while structure != []:
-            obj = structure[0]
-
-            if isinstance(obj, Variable):
-                if obj not in resdic:
-                    resdic[obj] = 1
-                else:
-                    resdic[obj] += 1
-            elif isinstance(obj, number):
-                resdic["number"] += obj
-            elif isinstance(obj, parentOperator):
-                if obj not in resdic:
-                    resdic[obj] = 1
-                else:
-                    resdic[obj] += 1
-                for obj2 in resdic:
-                    pass
-
-            structure = structure[1:]
-        print(resdic)
         res = ""
-        for thing, num in resdic.items():
-            if thing == "number" and num != 0:
-                res += f"{num} + "
-            else:
-                if num != 1:
-                    res += f"{num}{str(thing)} + "
-                else:
+        for thing, coeff in self.structure.items():
+            if thing == "number" and coeff != 0:
+                res += str(coeff)
+            if isinstance(thing, Variable):
+                if res != "":
+                    res += " + "
+                if coeff == 1:
                     res += f"{str(thing)}"
+                else:
+                    res += f"{str(coeff)}{str(thing)}"
+            if (isinstance(thing, parentFunction)) or (
+                isinstance(thing, parentOperator)
+            ):
+                if res != "":
+                    res += " + "
+                if coeff == 1:
+                    res += f"{str(thing)}"
+                else:
+                    res += f"{str(coeff)}{str(thing)}"
 
-        return res[:-3]
+        return res
 
 
 class sub(add):
@@ -181,36 +175,42 @@ class mul(parentOperator):
         return res
 
     def string(self, *args):
-        return "Yop"
-        resdic = {"number": 0}
-        structure = self.structure
-
-        while structure != []:
-            obj = structure[0]
-
-            if isinstance(obj, Variable) or isinstance(obj, parentOperator):
-                if obj not in resdic:
-                    resdic[obj] = 1
-                else:
-                    resdic[obj] += 1
-            elif isinstance(obj, number):
-                resdic["number"] += obj
-
-            structure = structure[1:]
-
         res = ""
-        for thing, num in resdic.items():
-            if thing == "number" and num != 1:
-                res += f"{num} * "
-            else:
-                if num != 1:
+        for thing, coeff in self.structure.items():
+            if thing == "number" and coeff != 0:
+                res += str(coeff)
+            if isinstance(thing, Variable):
+                if res != "":
+                    res += "*"
 
-                    res += f"{str(thing)}^{num} * "
+                if coeff == 1:
+                    res += f"{str(thing)}"
                 else:
+                    from .subandsuperscript import superscript
 
-                    res += f"{str(thing)} * "
+                    res += f"{str(thing)}{superscript(str(coeff))}"
+            if (isinstance(thing, parentFunction)) or (
+                isinstance(thing, parentOperator)
+            ):
+                if res != "":
+                    res += "*"
 
-        return res[:]
+                if isinstance(thing, add) and len(thing.structure) > 1:
+                    if coeff == 1:
+                        res += f"({str(thing)})"
+                    else:
+                        from .subandsuperscript import superscript
+
+                        res += f"({str(thing)}){superscript(str(coeff))}"
+                else:
+                    if coeff == 1:
+                        res += f"{str(thing)}"
+                    else:
+                        from .subandsuperscript import superscript
+
+                        res += f"{str(thing)}{superscript(str(coeff))}"
+
+        return res
 
 
 class div(parentOperator):
@@ -219,7 +219,6 @@ class div(parentOperator):
 
     def __init__(self, *init_structure):
         init = list(init_structure)
-
 
 
 class pow(parentOperator):
