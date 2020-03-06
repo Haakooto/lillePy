@@ -4,6 +4,25 @@ from .parentFunction import parentFunction
 from sympy import primefactors
 
 
+def simplify(function):
+    assert isinstance(function, parentFunction)
+
+    typ = type(function)
+    same_func_dict = {}
+    structure = function.structure
+
+    for i, obj1 in enumerate(structure):
+        for j, obj2 in enumerate(structure[i:]):
+            if check_if_equal_functions(obj1, obj2):
+                if obj1 not in same_func_dict:
+                    same_func_dict[obj1] = 1
+                else:
+                    same_func_dict[obj1] += 1
+                del structure[i]
+    for thing, num in same_func_dict.items():
+        pass
+
+
 def join_add_elements(function):
     assert isinstance(function, add), f"excpected type add got {type(function)}"
 
@@ -67,7 +86,7 @@ def reorder_div_elements(function):
         function, parentFunction
     ), f"excpected type parentFunction got {type(function)}"
     new_structure = function.structure[:]
-    obj1, obj2 = tuple(function.structure)
+    obj1, obj2 = *function.structure
     assert (
         self.init_function.__class__ == div
     ), f'expected funciton fype "div", got {function.init_function.__class__}'
