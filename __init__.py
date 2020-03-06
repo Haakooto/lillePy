@@ -1,5 +1,5 @@
-from . import myfunc
-from .myfunc import *
+from . import function
+from .function import *
 import CallableModules
 
 
