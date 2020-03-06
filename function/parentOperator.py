@@ -154,16 +154,12 @@ class sub(add):
     arg_example = "a - b"
 
     def __init__(self, *init_structure):
+        init = list(init_structure)
         try:
-            init_structure[1] = -init_structure[1]
+            init[1] = -init[1]
         except:
             print("go die")
-        self.init(init_structure)
-
-    def call(self, *args):
-        args = args[0]
-        assert len(args) == 2, "sub takes two arguments a,b -> a - b"
-        return args[0] - args[1]
+        self.init(init)
 
 
 class mul(parentOperator):
@@ -221,13 +217,9 @@ class div(parentOperator):
     arglen = 2
     arg_example = "a / b"
 
-    def call(self, *args):
-        args = args[0]
-        # assert len(args) == 2, "div takes two arguments a,b -> a/b"
-        return args[0] / args[1]
+    def __init__(self, *init_structure):
+        init = list(init_structure)
 
-    def string(self, *args):
-        return "TEMPORARY DIV STRING"
 
 
 class pow(parentOperator):
