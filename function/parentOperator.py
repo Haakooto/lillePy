@@ -10,41 +10,34 @@ class parentOperator:
     null_value = 0  # default for add
 
     def __init__(self, *init_structure):
+        self.init(init_structure)
+
+    def init(self, *init_structure):
+        self.original_structure = list(init_structure)
         self.structure = Struct({"number": self.null_value})
 
-        for obj in init_structure:
-            if isinstance(obj, Number):
-                self.structure["number"] = type(self).call(
-                    self, self.structure["number"], obj
-                )
-            elif obj in self.structure:
-                self.structure[obj] += 1
-            else:
-                self.structure[obj] = 1
+        for obj in self.original_structure:
+            self.append_to_structure(obj)
 
-        self.call_arg = None
-        self.validate_init_structure()
+        self = self.validate_init_structure()
 
-        # # the following is a bugfix that enables layering of anonymous functions
-        # for i, obj in enumerate(self.init_structure):
-        #     if isinstance(obj, parentFunction):
-        #         if (
-        #             False
-        #             in [isinstance(substruc, number) for substruc in obj.init_structure]
-        #         ) is False:
-        #             # This is TRUE if theres a function in the init_structure that only has
-        #             # numbers in its own init_structure. i.e it's a function with a numeric value
-        #             self.init_structure[i] = obj.call(obj.init_structure)
+    def append_to_structure(self, obj):
+        if isinstance(obj, Number):
+            self.structure["number"] = type(self).call(
+                self, self.structure["number"], obj
+            )
+        elif obj in self.structure:
+            self.structure[obj] += 1
+        else:
+            self.structure[obj] = 1
 
     def __call__(self, **kwargs):
         res = self.null_value
 
         for thing, coeff in self.structure.items():
             if isinstance(thing, parentFunction):
-                # print("parent")
                 res = self.call(thing(kwargs), coeff=coeff, res=res)
             elif isinstance(thing, Variable):
-                # print("var")
                 if Variable in kwargs:
                     res = self.call(kwargs[thing], coeff=coeff, res=res)
                 else:
@@ -59,10 +52,9 @@ class parentOperator:
                     var = list(kwargs.values())[0]
                     res = self.call(var, coeff=coeff, res=res)
             elif thing == "number":
-                # print("numnum")
                 res = self.call(coeff, res=res)
-
         return res
+
 
     def __str__(self):
         return "YEETING: Youshua-Elizian Extra-Terrestrial Inpastic-Normalized Graphisoding"
@@ -78,24 +70,11 @@ class parentOperator:
         else:
             return f"this function does not have string support yet"
 
-    def replace_variables_with_number(self, replacee):
-        print("Get OUT of my HEAD!")
-        return None
-        init_structure_variables_replaced = []
-        for obj in self.init_structure:
-
-            if isinstance(obj, parentFunction):
-                init_structure_variables_replaced.append(obj.__call__(replacee))
-            elif isinstance(obj, Variable):
-                init_structure_variables_replaced.append(replacee)
-            elif isinstance(obj, number):
-                init_structure_variables_replaced.append(obj)
-
-        return init_structure_variables_replaced
 
     def validate_init_structure(self):
-        n = len(self.structure)
+        n = len(self.original_structure)
         if self.arglen is not None:
+
             msg = (
                 f"{self.__class__} takes {self.arglen} arguments, but {n} were given. "
             )
@@ -106,12 +85,13 @@ class parentOperator:
             msg = msg[:-1] + " -> " + self.arg_example
             assert n == self.arglen, msg
         else:
+
             assert n > 1, f"{self.__class__} takes at least two arguments"
 
     def init_structure_are_numbers(self):
         # returns True if all the values in init_structure are numbers
         return (
-            False in [isinstance(obj, number) for obj in self.init_structure]
+            False in [isinstance(obj, Number) for obj in self.original_structure]
         ) is False
 
 
@@ -119,7 +99,6 @@ class add(parentOperator):
     arglen = None
 
     def call(self, *args, **kwargs):
-        # print(args, kwargs)
         if "res" not in kwargs:
             res = self.null_value
         else:
@@ -129,11 +108,9 @@ class add(parentOperator):
         else:
             coeff = kwargs["coeff"]
         for obj in args:
-            # print(res, "before")
             res += obj * coeff
-            # print(res, "after")
 
-        return res  # * coeff
+        return res
 
     def string(self, *args):
         print("NOPE")
@@ -174,7 +151,7 @@ class add(parentOperator):
         return res[:-3]
 
 
-class sub(parentOperator):
+class sub(add):
     arglen = 2
     arg_example = "a - b"
 
@@ -200,7 +177,7 @@ class mul(parentOperator):
         for obj in args:
             res *= obj ** coeff
 
-        return res  # ** coeff
+        return res
 
     def string(self, *args):
         return "Yop"
@@ -247,7 +224,6 @@ class div(parentOperator):
     def string(self, *args):
         return "TEMPORARY DIV STRING"
 
-
 class pow(parentOperator):
     arglen = 2
     arg_example = "a^b"
@@ -272,8 +248,3 @@ class sqrt(parentOperator):
 
     def string(self, string_arg):
         return f"sqrt({string_arg})"
-
-
-if __name__ == "__main__":
-    a = add(1, 2)
-    print(a)
