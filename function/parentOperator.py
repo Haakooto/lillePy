@@ -13,7 +13,7 @@ class parentOperator:
         self.init(init_structure)
 
     def init(self, *init_structure):
-        self.original_structure = list(init_structure)
+        self.original_structure = list(*init_structure)
         self.structure = Struct({"number": self.null_value})
 
         for obj in self.original_structure:
@@ -55,7 +55,6 @@ class parentOperator:
                 res = self.call(coeff, res=res)
         return res
 
-
     def __str__(self):
         return "YEETING: Youshua-Elizian Extra-Terrestrial Inpastic-Normalized Graphisoding"
         if "string" in dir(self):
@@ -69,7 +68,6 @@ class parentOperator:
 
         else:
             return f"this function does not have string support yet"
-
 
     def validate_init_structure(self):
         n = len(self.original_structure)
@@ -155,6 +153,13 @@ class sub(add):
     arglen = 2
     arg_example = "a - b"
 
+    def __init__(self, *init_structure):
+        try:
+            init_structure[1] = -init_structure[1]
+        except:
+            print("go die")
+        self.init(init_structure)
+
     def call(self, *args):
         args = args[0]
         assert len(args) == 2, "sub takes two arguments a,b -> a - b"
@@ -223,6 +228,7 @@ class div(parentOperator):
 
     def string(self, *args):
         return "TEMPORARY DIV STRING"
+
 
 class pow(parentOperator):
     arglen = 2
