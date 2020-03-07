@@ -57,7 +57,6 @@ class parentFunction:
     def replace_variables_with_number(self, replacee):
         init_structure_variables_replaced = []
 
-
         for obj in self.init_structure:
 
             if isinstance(obj, parentFunction):
@@ -152,18 +151,6 @@ class parentOperator:
 
     def __str__(self):
         return self.string()
-        # return "YEETING: Youshua-Elizian Extra-Terrestrial Inpastic-Normalized Graphisoding"
-        # if "string" in dir(self):
-        #     if self.init_structure_are_numbers():
-        #         return f"{self.call(self.init_structure)}"
-        #     else:
-        #         if len(self.init_structure) == 1:
-        #             return self.string(str(self.init_structure[0]))
-        #         else:
-        #             return self.string([str(obj) for obj in self.init_structure])
-        #
-        # else:
-        #     return f"this function does not have string support yet"
 
     def validate_init_structure(self):
         return True
@@ -188,3 +175,13 @@ class parentOperator:
         return (
             False in [isinstance(obj, Number) for obj in self.original_structure]
         ) is False
+
+    def __eq__(self, other):
+        if self.__class__ == pther.__class__:
+            if self.structure == other.structure:
+                return True
+        return False
+
+    def __hash__(self):
+        return 
+        # return hash(self.structure)
