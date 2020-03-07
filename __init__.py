@@ -1,5 +1,7 @@
 from . import function
+from . import stringHandling
 from .function import *
+from .stringHandling import *
 import CallableModules
 
 
