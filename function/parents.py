@@ -5,8 +5,6 @@ from numbers import Number as Number
 from .Variable import Variable, Struct
 
 
-
-
 class parentFunction:
     arglen = None
     arg_example = "this is a bug!"  # Should be set if arglen is not None
@@ -16,7 +14,6 @@ class parentFunction:
         self.validate_init_structure()
         self.structure = list(init_structure)[:]
         self.call_arg = None
-
 
         # the following is a bugfix that enables layering of anonymous functions
         for i, obj in enumerate(self.structure):
@@ -58,12 +55,10 @@ class parentFunction:
     def replace_variables_with_number(self, replacee):
         structure_variables_replaced = []
 
-
         for obj in self.structure:
 
             if isinstance(obj, parentFunction) or isinstance(obj, parentOperator):
                 structure_variables_replaced.append(obj.__call__(replacee))
-
 
             elif isinstance(obj, Variable):
                 structure_variables_replaced.append(replacee)
@@ -87,9 +82,7 @@ class parentFunction:
 
     def structure_is_numbers(self):
         # returns True if all the values in istructure are numbers
-        return (
-            False in [isinstance(obj, Number) for obj in self.structure]
-        ) is False
+        return (False in [isinstance(obj, Number) for obj in self.structure]) is False
 
 
 class parentOperator:
@@ -153,6 +146,14 @@ class parentOperator:
 
     def __str__(self):
         return self.string()
+
+    def repr(self):
+        clas = str(self.__class__)[:-2]
+        clas = clas[clas.rfind(".") + 1 :]
+        return f"({clas}, {self.structure})"
+
+    def __repr__(self):
+        return self.repr()
 
     def validate_init_structure(self):
 
