@@ -48,19 +48,6 @@ class add(parentOperator):
         return res
 
 
-class sub(add):
-    arglen = 2
-    arg_example = "a - b"
-
-    def __init__(self, *init_structure):
-        init = list(init_structure)
-        try:
-            init[1] = -init[1]
-        except:
-            print("go die")
-        self.init(init)
-
-
 class mul(parentOperator):
     arglen = None
     null_value = 1
@@ -116,37 +103,3 @@ class mul(parentOperator):
                         res += f"{str(thing)}{superscript(str(coeff))}"
 
         return res
-
-
-class div(parentOperator):
-    arglen = 2
-    arg_example = "a / b"
-
-    def __init__(self, *init_structure):
-        init = list(init_structure)
-
-
-class pow(parentOperator):
-    arglen = 2
-    arg_example = "a^b"
-
-    def call(self, *args):
-        args = args[0]
-        assert len(args) == 2, "pow takes two arguments a,b -> a^b"
-        return args[0] ** args[1]
-
-    def string(self, string_arg):
-        return f"{string_arg[0]}^{string_arg[1]}"
-
-
-class sqrt(parentOperator):
-    arglen = 1
-    arg_example = "sqrt(a)"
-
-    def call(self, *args):
-        args = args[0]
-        assert len(args) == 1, "pow takes one argument a -> sqrt(a)"
-        return args[0] ** (1 / 2)
-
-    def string(self, string_arg):
-        return f"sqrt({string_arg})"
