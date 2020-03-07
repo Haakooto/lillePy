@@ -10,7 +10,6 @@ class div(parentFunction):
     arglen = 2
 
     def call(self, *args):
-        print(args)
         return args[0][0] / args[0][1]
 
     def string(self):
@@ -61,7 +60,7 @@ class sqrt(parentFunction):
 
 class cos(parentFunction):
     arglen = 1
-    arg_example = "cos(a)"
+    func_name = "cos"
 
     def call(self, *args):
         arg = args[0]

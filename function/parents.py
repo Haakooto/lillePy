@@ -38,7 +38,7 @@ class parentFunction:
             structure_variables_replaced = self.replace_variables_with_number(
                 self.call_arg
             )
-            print(self.structure, structure_variables_replaced)
+
             return self.call(structure_variables_replaced)
 
     def __str__(self):
@@ -63,7 +63,7 @@ class parentFunction:
 
             if isinstance(obj, parentFunction) or isinstance(obj, parentOperator):
                 structure_variables_replaced.append(obj.__call__(replacee))
-            
+
 
             elif isinstance(obj, Variable):
                 structure_variables_replaced.append(replacee)
