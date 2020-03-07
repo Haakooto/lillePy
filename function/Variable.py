@@ -1,4 +1,4 @@
-class Variable:
+class Variable(str):
     def __init__(self, name=""):
         try:
             float(name)
@@ -16,10 +16,6 @@ class Variable:
 
 
 class Struct(dict):
-    # def __init__(self, *args, **kwargs):
-    # super().__init__(kwargs)
-    # self.name = "noname"
-
     def __add__(self, other):
         if isinstance(other, Struct):
             new = Struct({**self, **other})
@@ -34,14 +30,5 @@ class Struct(dict):
     def __mul__(self, other):
         return self + other
 
-    # def __str__(self):
-    # return f"{self.name}: {str(dict(self))}"
-
-
-# x = Variable("x")
-
-# a = Struct()
-# a["A"] = 1
-# b = Struct()
-# b["B"] = 2
-# print(a + b)
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
