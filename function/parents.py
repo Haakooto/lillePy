@@ -179,11 +179,10 @@ class parentOperator:
         ) is False
 
     def __eq__(self, other):
-        if self.__class__ == pther.__class__:
+        if self.__class__ == other.__class__:
             if self.structure == other.structure:
                 return True
         return False
 
     def __hash__(self):
-        return
-        # return hash(self.structure)
+        return hash(self.structure)
