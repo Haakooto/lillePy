@@ -103,3 +103,21 @@ class mul(parentOperator):
                         res += f"{str(thing)}{superscript(str(coeff))}"
 
         return res
+
+class pow(parentOperator):
+    arglen = 2
+    null_value = 1
+
+    def call(self, *args, **kwargs):
+        if "res" not in kwargs:
+            res = self.null_value
+        else:
+            res = kwargs["res"]
+        if "coeff" not in kwargs:
+            coeff = 1
+        else:
+            coeff = kwargs["coeff"]
+        for obj in args:
+            res *= obj ** coeff
+
+        return res
