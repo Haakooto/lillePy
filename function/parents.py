@@ -108,6 +108,14 @@ class parentOperator:
             self.structure["number"] = type(self).call(
                 self, self.structure["number"], obj
             )
+
+        elif isinstance(obj, parentOperator):
+            if (
+                self.null_value == obj.null_value
+            ):  # check if same operator type (add and add, or mul and mul)
+                self.structure = type(self).call(self, obj.structure, res=self.structure)
+                # self.structure += obj.structure
+
         elif obj in self.structure:
             self.structure[obj] += 1
         else:
