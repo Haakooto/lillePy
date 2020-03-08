@@ -104,6 +104,7 @@ class mul(parentOperator):
 
         return res
 
+
 class pow(parentOperator):
     arglen = 2
     null_value = 1
