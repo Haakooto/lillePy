@@ -1,3 +1,8 @@
+from numbers import Number
+
+# import LillePy as lp
+
+
 class Variable(str):
     def __init__(self, name=""):
         try:
@@ -19,16 +24,60 @@ class Struct(dict):
     def __add__(self, other):
         if isinstance(other, Struct):
             new = Struct({**self, **other})
-            new.name = self.name
             for obj, coeff in new.items():
                 if obj in self and obj in other:
                     new[obj] = coeff + self[obj]
             return new
+
+        elif "__iter__" not in dir(other):
+            if isinstance(other, Number):
+                self["number"] += other
+            else:
+                other = Struct({str(other): 1})
+                self += other
+            return self
         else:
             print(other, type(other))
+            print("something went wrong")
+            import sys
+
+            sys.exit()
 
     def __mul__(self, other):
-        return self + other
+        if isinstance(other, Struct):
+            new = Struct({**self, **other})
+            for obj, coeff in new.items():
+                if obj in self and obj in other:
+                    if obj != "number":
+                        new[obj] = coeff + self[obj]
+                    else:
+                        new[obj] = coeff * self[obj]
+            return new
+        elif "__iter__" not in dir(other):
+            if isinstance(other, Number):
+                self["number"] *= other
+            else:
+                other = Struct({str(obj): 1})
+                self *= other
+            return self
+        else:
+            print(other, type(other))
+            print("something went wrong")
+            import sys
+
+            sys.exit()
+
+    def __pow__(self, other):
+        if isinstance(other, Number):
+            print("hello")
+            new = Struct()
+            for obj, coeff in self.items():
+                new[obj] = coeff * other
+            return new
+        else:
+            print(f"Struct power of type {type(other)} has not yet been implemented!")
+            import sys
+            sys.exit()
 
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
