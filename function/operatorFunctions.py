@@ -108,6 +108,22 @@ class sub(add):
             self.append_to_structure(b, "sd")
 
 
+class div(mul):
+    arglen = 2
+
+    def init(self):
+        a, b = self.original_structure
+
+        if isinstance(a, Number):
+            self.structure["number"] = a
+        else:
+            self.structure[a] = 1
+        if isinstance(b, Number):
+            self.structure["number"] /= b
+        else:
+            self.append_to_structure(b, "sd")
+
+
 class pow(parentOperator):
     arglen = 2
     null_value = 1
