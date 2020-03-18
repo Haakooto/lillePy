@@ -10,17 +10,10 @@ class add(parentOperator):
     arglen = None
 
     def call(self, *args, **kwargs):
-        if "res" not in kwargs:
-            res = self.null_value
-        else:
-            res = kwargs["res"]
-        if "coeff" not in kwargs:
-            coeff = 1
-        else:
-            coeff = kwargs["coeff"]
+        res, coeff = self.res_coeff(*args, **kwargs)
+
         for obj in args:
             res += obj * coeff
-
         return res
 
     def string(self, *args):
@@ -53,14 +46,8 @@ class mul(parentOperator):
     null_value = 1
 
     def call(self, *args, **kwargs):
-        if "res" not in kwargs:
-            res = self.null_value
-        else:
-            res = kwargs["res"]
-        if "coeff" not in kwargs:
-            coeff = 1
-        else:
-            coeff = kwargs["coeff"]
+        res, coeff = self.res_coeff(*args, **kwargs)
+
         for obj in args:
             res *= obj ** coeff
 
@@ -103,6 +90,22 @@ class mul(parentOperator):
                         res += f"{str(thing)}{superscript(str(coeff))}"
 
         return res
+
+
+class sub(add):
+    arglen = 2
+
+    def init(self):
+        a, b = self.original_structure
+
+        if isinstance(a, Number):
+            self.structure["number"] = a
+        else:
+            self.structure[a] = 1
+        if isinstance(b, Number):
+            self.structure["number"] -= b
+        else:
+            self.append_to_structure(b, "sd")
 
 
 class pow(parentOperator):
