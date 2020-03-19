@@ -4,34 +4,6 @@ import function as function
 from numbers import Number
 
 
-function_names = dir(function)
-for del_obj in [
-    "Bunch",
-    "Number",
-    "Struct",
-    "Variable",
-    "__builtins__",
-    "__cached__",
-    "__doc__",
-    "__file__",
-    "__loader__",
-    "__name__",
-    "__package__",
-    "__path__",
-    "__spec__",
-    "add",
-    "basicFunctions",
-    "np",
-    "operatorFunctions",
-    "parentFunction",
-    "parentOperator",
-    "parents",
-    "sys"
-    # This list needs to be expanded as new structures are added
-]:
-    function_names.remove(del_obj)
-
-
 def getSizeOfNestedList(listOfElem):
     """ Get number of elements in a nested list"""
     count = 0
@@ -46,21 +18,13 @@ def getSizeOfNestedList(listOfElem):
     return count
 
 
-def find_closing_parenthesis(string, index):
-    # this function finds the index of the closing parenthesis in a string
-    # index is the index of the parenthesis we wish to find
-    # its closed counterpart to
-    assert string[index] == "(", f'expected symbol "(", got {string[index]}'
+def countNestings(l, n=0):
+    print(n, l)
+    for i in l:
+        if type(i) == list:
+            return countNestings(i, n=n + 1)
 
-    # this is how many '(' are between the current parenthesis and the fisr cllsing parenthesis
-    start_par_amount = string[index + 1 : index + string[index:].index(")")].count("(")
-    j = start_par_amount
-    i = 0
-    while j >= 0:
-        if string[index + 1 + i] == ")":
-            j -= 1
-        i += 1
-    return index + i
+    return n
 
 
 def string_is_number(obj):
@@ -71,98 +35,176 @@ def string_is_number(obj):
         return False
 
 
-def number_segment(string, index):
-    res = string[index]
-    obj = res
-    i = 1
-    while True:
+class stringHandler:
+    """A comprehensive string handler that will convert a string
+        from user input to a function of lillepy-type"""
+
+    function_names = dir(function)
+    for deletion in [
+        "Bunch",
+        "Number",
+        "Struct",
+        "Variable",
+        "__builtins__",
+        "__cached__",
+        "__doc__",
+        "__file__",
+        "__loader__",
+        "__name__",
+        "__package__",
+        "__path__",
+        "__spec__",
+        "add",
+        "basicFunctions",
+        "np",
+        "operatorFunctions",
+        "parentFunction",
+        "parentOperator",
+        "parents",
+        "sys"
+        # This list needs to be expanded as new structures are added
+    ]:
+        function_names.remove(deletion)
+
+    def __init__(self, string):
+        self.splitted_expression = []
+        self.string = string
+
+        if debug:
+            print(self.string, "init string print")
+
+    def find_closing_parenthesis(self, index):
+        # this function finds the index of the closing parenthesis in a string
+        # index is the index of the parenthesis we wish to find
+        # its closed counterpart to
+        assert (
+            self.string[index] == "("
+        ), f'expected symbol "(", got {self.string[index]}'
+
+        # this is how many '(' are between the current parenthesis and the fisr cllsing parenthesis
+        start_par_amount = self.string[
+            index + 1 : index + self.string[index:].index(")")
+        ].count("(")
+        j = start_par_amount
+        i = 0
+        while j >= 0:
+            if self.string[index + 1 + i] == ")":
+                j -= 1
+            i += 1
+        return index + i
+
+    def number_segment(self, index):
+        res = self.string[index]
+        obj = res
+        i = 1
+        while True:
+            try:
+                obj = self.string[index + i]
+            except:
+                break
+            if (not string_is_number(obj)) and (obj != "."):
+                break
+            res += obj
+            i += 1
+        if res.count(".") > 1:
+            print(f"Error, check decimal points in {self.string} around index {i}")
+            sys.exit(1)
+        return res
+
+    def function_segment(self, index):
+        par0_index = self.string[index:].index("(") + index
+
+        par1_index = self.find_closing_parenthesis(par0_index)
+
+        if debug:
+            print(self.string[par0_index + 1 : par1_index], "part sent into handler")
+
+        dummy_instance = stringHandler(f"{self.string[par0_index + 1 : par1_index]}")
+
+        dummy_instance.splitted_list()
+        if debug:
+            print(
+                dummy_instance.splitted_expression,
+                "splitted expression returned from splitting",
+            )
+        return (
+            f"{self.string[index:par0_index]}",
+            dummy_instance.splitted_expression,
+        )
+
+    def following_segment_is_function(self, index):
+        # currently all functions need to use ().
         try:
-            obj = string[index + i]
+            par0_index = self.string[index:].index("(") + index
+
+            if self.string[index:par0_index] in self.function_names:
+                return True
         except:
-            break
-        if (not string_is_number(obj)) and (obj != "."):
-            break
-        res += obj
-        i += 1
-    if res.count(".") > 1:
-        print(f"Error, check deciaml points in {string}")
-        sys.exit(1)
-    return res
+            return False
 
-
-def segment_is_function(string, index):
-    # currently all functions need to use ().
-    try:
-        par0_index = string[index:].index("(") + index
-
-        if string[index:par0_index] in function_names:
-            return True
-
-    except:
+    def following_segment_is_local(self, index):
+        # currently not implemented
         return False
 
+    def splitted_list(self):
+        var = "x"
+        i = 0
+        while True:
+            # print(self.string, "routine, string print")
+            # co is short for current object
+            if debug:
 
-def function_segment(string, index):
-    par0_index = string[index:].index("(") + index
+                print(
+                    f"routine string[{i}]={self.string[i]}, splitted_expression = {self.splitted_expression}"
+                )
+            co = self.string[i]
+            if co in [var, "+", "-", "/", "*", "÷"]:
+                self.splitted_expression.append(co)
+                i += 1
+            elif string_is_number(co):
+                # fo is short for following objects
+                if debug:
+                    print(co, "string_is_number")
+                fo = self.number_segment(i)
+                self.splitted_expression.append(eval(fo))
+                i += len(fo)
 
-    par1_index = find_closing_parenthesis(string, par0_index)
-    print(string[par0_index + 1 : par1_index], "as")
-    return (
-        f"{string[index:par0_index]}",
-        splitter(string[par0_index + 1 : par1_index]),
-    )
+            # elif segment_is_local(string, i):
+            #    pass
+            elif self.following_segment_is_function(i):
+                if debug:
+                    print(self.string[i], "following_segment_is_function")
+                dummy = self.function_segment(i)
+                fname = dummy[0]
+                fexpr = dummy[1]  # might be a nested lsit itself
+                self.splitted_expression.append(fname)
+                self.splitted_expression.append(list(fexpr))
+                # print(fexpr)
 
+                length_of_function = (
+                    len(fname) + getSizeOfNestedList(fexpr) + 2 * (countNestings(fexpr))
+                )
+                if debug:
+                    print(f"length of {fname}({fexpr}): {length_of_function}")
+                i += length_of_function
+            # elif co == "(":
+            #     print(string, i)
+            #     closing_index = find_closing_parenthesis(string, i)
+            #     splitted_expression.append(splitter(string[i + 1 : closing_index]))
+            #     i += closing_index - i
 
-def segment_is_local(string, index):
-    return False
-
-
-def splitter(string):
-    splitted_expression = []
-    var = "x"
-    i = 0
-    while True:
-        # co is short for current object
-        co = string[i]
-        if co in [var, "+", "-", "/", "*", "÷"]:
-            splitted_expression.append(co)
-            i += 1
-        elif string_is_number(co):
-            # fo is short for following objects
-            fo = number_segment(string, i)
-            splitted_expression.append(eval(fo))
-            i += len(fo)
-            print("hey", string)
-        # elif segment_is_local(string, i):
-        #    pass
-        elif segment_is_function(string, i):
-            dummy = function_segment(string, i)
-            fname = dummy[0]
-            fexpr = dummy[1]  # might be a nested lsit itself
-            splitted_expression.append(fname)
-            splitted_expression.append(list(fexpr))
-            length_of_function = (
-                len(fname) + getSizeOfNestedList(fexpr) + 2
-            )  # 2 for the ()'s
-            i += length_of_function + 1
-        # elif co == "(":
-        #     print(string, i)
-        #     closing_index = find_closing_parenthesis(string, i)
-        #     splitted_expression.append(splitter(string[i + 1 : closing_index]))
-        #     i += closing_index - i
-
-        else:
-            print(co)
-            i += 1
-        if i == len(string):
-            break
-    return splitted_expression
+            else:
+                break
+            if i == len(self.string):
+                break
+        return self.splitted_expression
 
 
-"""FOR Å FIKSE DUPLIKERING AV DE SISTE ELEMENTENE, MÅ DU SKRIVE OM DEET OVER TIL
-EN KLASSE. DET ER FEIL FORDI ALLE NESTED ELEMENTER ENDRER PÅ SAMME LISTE SOM DERES SUPER"""
-uin = "sin(sin(cos(987654321))))"
-print(splitter(uin))
+print(countNestings([123, [34, 4, [4]]], 0))
+debug = True
+uin = "12+sin(34*cos(56-ln(78)))"
+w = stringHandler(uin)
+print(w.splitted_list())
 # print(splitter(uin))
 # for word in dir(function):
 #
