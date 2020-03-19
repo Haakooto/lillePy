@@ -1,4 +1,5 @@
 from numbers import Number
+from bunch import Bunch
 
 # import LillePy as lp
 
@@ -21,6 +22,23 @@ class Variable(str):
 
 
 class Struct(dict):
+    # def __init__(self, *args, **kwargs):
+    #     if "weird" in kwargs:
+    #         self.weird = True
+    #         del kwargs["weird"]
+    #     else:
+    #         self.weird = False
+    #     super().__init__(*args, **kwargs)
+
+    # def exclude_num(self):
+    #     tmp = Struct()
+    #     for key, val in self.items():
+    #         if key != "number":
+    #             tmp[key] = val
+    #         else:
+    #             tmp[key] = 1
+    #     return tmp
+
     def __add__(self, other):
         if isinstance(other, Struct):
             new = Struct({**self, **other})
@@ -69,7 +87,6 @@ class Struct(dict):
 
     def __pow__(self, other):
         if isinstance(other, Number):
-            print("hello")
             new = Struct()
             for obj, coeff in self.items():
                 new[obj] = coeff * other
@@ -77,6 +94,7 @@ class Struct(dict):
         else:
             print(f"Struct power of type {type(other)} has not yet been implemented!")
             import sys
+
             sys.exit()
 
     def __hash__(self):

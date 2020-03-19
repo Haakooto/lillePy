@@ -91,18 +91,18 @@ class parentOperator:
     null_value = 0  # default for add
 
     def __init__(self, *init_structure):
-        self.init(init_structure)
-
-    def init(self, *init_structure):
-        self.original_structure = list(*init_structure)
-
+        self.original_structure = list(init_structure)
         self.structure = Struct({"number": self.null_value})
+
+        self.init()
+        self = self.validate_init_structure()
+
+    def init(self):
         for obj in self.original_structure:
             self.append_to_structure(obj)
 
-        self = self.validate_init_structure()
-
-    def append_to_structure(self, obj):
+    def append_to_structure(self, obj, am_sd="am"):
+        assert am_sd in ("am", "sd")
 
         if isinstance(obj, Number):
             self.structure["number"] = type(self).call(
@@ -113,13 +113,39 @@ class parentOperator:
             if (
                 self.null_value == obj.null_value
             ):  # check if same operator type (add and add, or mul and mul)
-                self.structure = type(self).call(self, obj.structure, res=self.structure)
-                # self.structure += obj.structure
+                self.structure = type(self).call(
+                    self, obj.structure, res=self.structure
+                )
+            # elif self.null_value == 0 and obj.null_value == 1:
+            #     if len(obj.structure) == 2:
+            #         self.structure = type(self).call(
+            #             self,
+            #             obj.structure.exclude_num(),
+            #             res=self.structure,
+            #             coeff=obj.structure["number"],
+            #         )
 
         elif obj in self.structure:
-            self.structure[obj] += 1
+            if am_sd == "am":
+                self.structure[obj] += 1
+            else:
+                self.structure[obj] -= 1
         else:
-            self.structure[obj] = 1
+            if am_sd == "am":
+                self.structure[obj] = 1
+            else:
+                self.structure[obj] = -1
+
+    def res_coeff(self, *args, **kwargs):
+        if "res" not in kwargs:
+            res = self.null_value
+        else:
+            res = kwargs["res"]
+        if "coeff" not in kwargs:
+            coeff = 1
+        else:
+            coeff = kwargs["coeff"]
+        return res, coeff
 
     def __call__(self, *args):
 
@@ -128,7 +154,7 @@ class parentOperator:
         if isinstance(arg, Variable):
             return self
         for thing, coeff in self.structure.items():
-            print(thing, coeff)
+            # print(thing, coeff)
             if isinstance(thing, parentOperator):
                 res = self.call(thing(arg), coeff=coeff, res=res)
             elif isinstance(thing, parentFunction):
