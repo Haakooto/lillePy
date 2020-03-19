@@ -32,7 +32,21 @@ for del_obj in [
     function_names.remove(del_obj)
 
 
-def find_closed_parenthesis(string, index):
+def getSizeOfNestedList(listOfElem):
+    """ Get number of elements in a nested list"""
+    count = 0
+    # Iterate over the list
+    for elem in listOfElem:
+        # Check if type of element is list
+        if type(elem) == list:
+            # Again call this function to get the size of this element
+            count += getSizeOfNestedList(elem)
+        else:
+            count += 1
+    return count
+
+
+def find_closing_parenthesis(string, index):
     # this function finds the index of the closing parenthesis in a string
     # index is the index of the parenthesis we wish to find
     # its closed counterpart to
@@ -57,7 +71,7 @@ def string_is_number(obj):
         return False
 
 
-def segment_is_number(string, index):
+def number_segment(string, index):
     res = string[index]
     obj = res
     i = 1
@@ -76,29 +90,80 @@ def segment_is_number(string, index):
     return res
 
 
+def segment_is_function(string, index):
+    # currently all functions need to use ().
+    try:
+        par0_index = string[index:].index("(") + index
+
+        if string[index:par0_index] in function_names:
+            return True
+
+    except:
+        return False
+
+
+def function_segment(string, index):
+    par0_index = string[index:].index("(") + index
+
+    par1_index = find_closing_parenthesis(string, par0_index)
+    print(string[par0_index + 1 : par1_index], "as")
+    return (
+        f"{string[index:par0_index]}",
+        splitter(string[par0_index + 1 : par1_index]),
+    )
+
+
+def segment_is_local(string, index):
+    return False
+
+
 def splitter(string):
     splitted_expression = []
+    var = "x"
     i = 0
     while True:
         # co is short for current object
         co = string[i]
-        if string_is_number(co):
-            # fo is short for following objects
-            fo = segment_is_number(string, i)
-            i += len(fo)
-            splitted_expression.append(eval(fo))
-        elif co in ["+", "-", "/", "*", "÷"]:
+        if co in [var, "+", "-", "/", "*", "÷"]:
             splitted_expression.append(co)
             i += 1
+        elif string_is_number(co):
+            # fo is short for following objects
+            fo = number_segment(string, i)
+            splitted_expression.append(eval(fo))
+            i += len(fo)
+            print("hey", string)
+        # elif segment_is_local(string, i):
+        #    pass
+        elif segment_is_function(string, i):
+            dummy = function_segment(string, i)
+            fname = dummy[0]
+            fexpr = dummy[1]  # might be a nested lsit itself
+            splitted_expression.append(fname)
+            splitted_expression.append(list(fexpr))
+            length_of_function = (
+                len(fname) + getSizeOfNestedList(fexpr) + 2
+            )  # 2 for the ()'s
+            i += length_of_function + 1
+        # elif co == "(":
+        #     print(string, i)
+        #     closing_index = find_closing_parenthesis(string, i)
+        #     splitted_expression.append(splitter(string[i + 1 : closing_index]))
+        #     i += closing_index - i
+
         else:
+            print(co)
             i += 1
         if i == len(string):
             break
     return splitted_expression
 
 
-uin = "234+34556+3.2"
+"""FOR Å FIKSE DUPLIKERING AV DE SISTE ELEMENTENE, MÅ DU SKRIVE OM DEET OVER TIL
+EN KLASSE. DET ER FEIL FORDI ALLE NESTED ELEMENTER ENDRER PÅ SAMME LISTE SOM DERES SUPER"""
+uin = "sin(sin(cos(987654321))))"
 print(splitter(uin))
+# print(splitter(uin))
 # for word in dir(function):
 #
 #     if str(word) in uin:
