@@ -70,7 +70,7 @@ class stringHandler:
 
     function_names = dir(function)
     for deletion in [
-        "Bunch",
+        # "Bunch",  # Dont think we use this
         "Number",
         "Struct",
         "Variable",
@@ -249,7 +249,7 @@ def __call__(*args, **kwargs):
         uin = args[0]
         w = stringHandler(uin)
         split = w.splitted_list()
-        print(split)
+        return split
 
 
 CallableModules.patch()
