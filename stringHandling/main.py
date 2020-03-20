@@ -48,7 +48,7 @@ def string_is_number(obj):
     try:
         float(obj)
         return True
-    except:
+    except ValueError:
         return False
 
 
@@ -58,7 +58,7 @@ class stringHandler:
 
     function_names = dir(function)
     for deletion in [
-        "Bunch",
+        # "Bunch",  # Dont think we use this
         "Number",
         "Struct",
         "Variable",
@@ -117,7 +117,7 @@ class stringHandler:
         while True:
             try:
                 obj = self.string[index + i]
-            except:
+            except IndexError:
                 break
             if (not string_is_number(obj)) and (obj != "."):
                 break
@@ -170,10 +170,8 @@ class stringHandler:
     def splitted_list(self, local_user_dict):
         if debug:
             print(f"len(string): {len(self.string)}")
-        var = "x"
         i = 0
         while True:
-            # print(self.string, "routine, string print")
             # co is short for current object
             if debug:
                 print(
