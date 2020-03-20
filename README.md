@@ -17,8 +17,8 @@ if a completed object needs to be bug-tested, include a % at the beginning
     read file line by line, determine if locals defined. Only allow functions as lambdas
   #### make add and mul collapse nicely
 ### IN-WORK
-  #### basic string-comprehension and recognition
-    bahjemga
+  #### bahjemga: basic string-comprehension and recognition
+    Avoid add in sub
   - do some random shit
 ### COMPLETE
   #### basicFunctions support
