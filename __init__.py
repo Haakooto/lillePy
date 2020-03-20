@@ -6,7 +6,6 @@ String handling, make modules callable, import locals from user
 from .function import *
 import CallableModules
 
-
 global local_user_dict, debug, failsafe
 import sys
 
@@ -208,7 +207,7 @@ class stringHandler:
                 if debug:
                     print(self.string[i], "following_segment_is_function")
                 fname, fexpr = self.function_segment(i)
-                self.splitted_expression.append(fname)
+                self.splitted_expression.append(f"f.{fname}")
                 self.splitted_expression.append(list(fexpr))
                 # we now increase the index i by the length of our total function
                 a = len(fname)
@@ -219,7 +218,7 @@ class stringHandler:
                 if debug:
                     print(f"{self.string[i]} following_segment_is_user_local")
                 local = self.following_segment_is_user_local(i)[1]
-                self.splitted_expression.append(local)
+                self.splitted_expression.append(f"l.{local}")
 
                 i += len(local)
 
