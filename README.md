@@ -18,7 +18,7 @@ if a completed object needs to be bug-tested, include a % at the beginning
   #### make add and mul collapse nicely
 ### IN-WORK
   #### bahjemga: basic string-comprehension and recognition
-    Avoid add in sub
+  - Avoid add in sub
   - do some random shit
 ### COMPLETE
   #### basicFunctions support
