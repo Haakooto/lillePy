@@ -4,27 +4,60 @@ import function as function
 from numbers import Number
 
 
-def getSizeOfNestedList(listOfElem):
-    """ Get number of elements in a nested list"""
-    count = 0
-    # Iterate over the list
-    for elem in listOfElem:
-        # Check if type of element is list
-        if type(elem) == list:
-            # Again call this function to get the size of this element
-            count += getSizeOfNestedList(elem)
-        else:
-            count += 1
-    return count
+def listToString(l):
+    assert type(l) == list, f"expected type list, got {type(l)}"
+    l = removeNestings(l)
+    res = ""
+    for i in l:
+        res += str(i)
+    return res
 
 
-def countNestings(l, n=0):
-    print(n, l)
+def countNestings(l, count=0):
+
     for i in l:
         if type(i) == list:
-            return countNestings(i, n=n + 1)
 
-    return n
+            count = countNestings(i, count + 1)
+    return count
+    #
+    # """ Get number of elements in a nested list"""
+    # count = 0
+    # # Iterate over the list
+    # for elem in listOfElem:
+    #     # Check if type of element is list
+    #     if type(elem) == list:
+    #         # Again call this function to get the size of this element
+    #         count += countNestings(elem)
+    #     else:
+    #         count += 1
+    # return count
+
+
+def removeNestingse(l, output=[]):
+    print(f"removeNestings({l})")
+    for i in l:
+        if type(i) != list:
+            output.append(i)
+        else:
+            removeNestings(i, output)
+    return output
+
+
+def removeNestings(nestedList):
+    """ Converts a nested list to a flat list """
+    flatList = []
+    # Iterate over all the elements in given list
+    for elem in nestedList:
+        # Check if type of element is list
+        if isinstance(elem, list):
+            # Extend the flat list by adding contents of this element (list)
+            flatList.extend(removeNestings(elem))
+        else:
+            # Append the elemengt to the list
+            flatList.append(elem)
+
+    return flatList
 
 
 def string_is_number(obj):
@@ -147,13 +180,14 @@ class stringHandler:
         return False
 
     def splitted_list(self):
+        if debug:
+            print(f"len(string): {len(self.string)}")
         var = "x"
         i = 0
         while True:
             # print(self.string, "routine, string print")
             # co is short for current object
             if debug:
-
                 print(
                     f"routine string[{i}]={self.string[i]}, splitted_expression = {self.splitted_expression}"
                 )
@@ -174,38 +208,31 @@ class stringHandler:
             elif self.following_segment_is_function(i):
                 if debug:
                     print(self.string[i], "following_segment_is_function")
-                dummy = self.function_segment(i)
-                fname = dummy[0]
-                fexpr = dummy[1]  # might be a nested lsit itself
+                fname, fexpr = self.function_segment(i)
                 self.splitted_expression.append(fname)
                 self.splitted_expression.append(list(fexpr))
-                # print(fexpr)
-
-                length_of_function = (
-                    len(fname) + getSizeOfNestedList(fexpr) + 2 * (countNestings(fexpr))
-                )
-                if debug:
-                    print(f"length of {fname}({fexpr}): {length_of_function}")
-                i += length_of_function
-            # elif co == "(":
-            #     print(string, i)
-            #     closing_index = find_closing_parenthesis(string, i)
-            #     splitted_expression.append(splitter(string[i + 1 : closing_index]))
-            #     i += closing_index - i
-
+                # we now increase the index i by the length of our total function
+                a = len(fname)
+                b = len(self.string[i + a : self.find_closing_parenthesis(i + a) + 1])
+                i += a + b
             else:
+                print(f"ERROR string[{i}]={self.string[i]}")
+                print(
+                    "This message wil only appear if something critical is wrong with the string handling method"
+                )
                 break
             if i == len(self.string):
                 break
         return self.splitted_expression
 
 
-print(countNestings([123, [34, 4, [4]]], 0))
-debug = True
-uin = "12+sin(34*cos(56-ln(78)))"
+debug = False
+uin = "sin(23)+45*cos(23599*sin(54321*cos(12*sin(34))))+sin(12)"
+
+
 w = stringHandler(uin)
 print(w.splitted_list())
-# print(splitter(uin))
+
 # for word in dir(function):
 #
 #     if str(word) in uin:
