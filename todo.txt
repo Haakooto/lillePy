@@ -13,6 +13,8 @@ if a completed object needs to be bug-tested, include a % at the beginning
     as the cross-import from the user could create trouble here.
 ## IN-WORK
   - basic string-comprehension and recognition | bahjemga
+        subtodo:
+        -avoid add in sub
 ## COMPLETE
   - basicFunctions support
   - %import of locals from any python script
