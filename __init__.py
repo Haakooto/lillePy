@@ -32,10 +32,8 @@ def listToString(l):
 
 
 def countNestings(l, count=0):
-
     for i in l:
         if type(i) == list:
-
             count = countNestings(i, count + 1)
     return count
 
@@ -172,7 +170,7 @@ class stringHandler:
             return False
 
     def following_segment_is_user_local(self, index):
-        for key in local_user_dict.keys():
+        for key in sorted(local_user_dict.keys(), key=len, reverse=True):
             if (key in self.string[index:]) and (key[0] == self.string[index]):
                 return True, key
         else:
