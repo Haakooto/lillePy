@@ -16,6 +16,7 @@ if a completed object needs to be bug-tested, include a % at the beginning
   - find better way of finding usr locals
 ### IN-WORK
   - basic string-comprehension and recognition | bahjemga
+  - test
 ### COMPLETE
   - basicFunctions support
   - import of locals from any python script
