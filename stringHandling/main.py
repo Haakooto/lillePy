@@ -3,6 +3,12 @@ import sys
 import function as function
 from numbers import Number
 
+global local_user_dict
+import os
+
+
+# from ..__init__ import local_user_dict
+
 
 def listToString(l):
     assert type(l) == list, f"expected type list, got {type(l)}"
@@ -20,28 +26,6 @@ def countNestings(l, count=0):
 
             count = countNestings(i, count + 1)
     return count
-    #
-    # """ Get number of elements in a nested list"""
-    # count = 0
-    # # Iterate over the list
-    # for elem in listOfElem:
-    #     # Check if type of element is list
-    #     if type(elem) == list:
-    #         # Again call this function to get the size of this element
-    #         count += countNestings(elem)
-    #     else:
-    #         count += 1
-    # return count
-
-
-def removeNestingse(l, output=[]):
-    print(f"removeNestings({l})")
-    for i in l:
-        if type(i) != list:
-            output.append(i)
-        else:
-            removeNestings(i, output)
-    return output
 
 
 def removeNestings(nestedList):
@@ -175,11 +159,15 @@ class stringHandler:
         except:
             return False
 
-    def following_segment_is_local(self, index):
+    def following_segment_is_user_local(self, index, local_user_dict):
         # currently not implemented
-        return False
+        for key in local_user_dict.keys():
+            if (key in self.string[index:]) and (key[0] == self.string[index]):
+                return True, key
+        else:
+            return False, None
 
-    def splitted_list(self):
+    def splitted_list(self, local_user_dict):
         if debug:
             print(f"len(string): {len(self.string)}")
         var = "x"
@@ -192,7 +180,7 @@ class stringHandler:
                     f"routine string[{i}]={self.string[i]}, splitted_expression = {self.splitted_expression}"
                 )
             co = self.string[i]
-            if co in [var, "+", "-", "/", "*", "÷"]:
+            if co in ["+", "-", "/", "*", "÷"]:
                 self.splitted_expression.append(co)
                 i += 1
             elif string_is_number(co):
@@ -203,8 +191,10 @@ class stringHandler:
                 self.splitted_expression.append(eval(fo))
                 i += len(fo)
 
-            # elif segment_is_local(string, i):
-            #    pass
+            elif self.following_segment_is_user_local(i, local_user_dict)[0]:
+                local = self.following_segment_is_user_local[1]
+                self.splitted_expression.append(local)
+                i += len(local)
             elif self.following_segment_is_function(i):
                 if debug:
                     print(self.string[i], "following_segment_is_function")
@@ -215,10 +205,19 @@ class stringHandler:
                 a = len(fname)
                 b = len(self.string[i + a : self.find_closing_parenthesis(i + a) + 1])
                 i += a + b
+
+            elif self.string[i] == "(":
+                par0_index = i
+                par1_index = self.find_closing_parenthesis(i)
+                dummy_instance = stringHandler(self.string[par0_index + 1 : par1_index])
+                self.splitted_expression.append(dummy_instance.splitted_list())
+
+                i += len(self.string[par0_index : par1_index + 1])
+
             else:
                 print(f"ERROR string[{i}]={self.string[i]}")
                 print(
-                    "This message wil only appear if something critical is wrong with the string handling method"
+                    "This message wil only appear if something critical is wrong with the string handling method. Even though the result may sometimes appear correct, this needs to be fixed"
                 )
                 break
             if i == len(self.string):
@@ -227,11 +226,10 @@ class stringHandler:
 
 
 debug = False
-uin = "sin(23)+45*cos(23599*sin(54321*cos(12*sin(34))))+sin(12)"
-
-
-w = stringHandler(uin)
-print(w.splitted_list())
+if __name__ == "__main__":
+    uin = "23*(5*sin(23))"
+    w = stringHandler(uin)
+    print(w.splitted_list())
 
 # for word in dir(function):
 #
