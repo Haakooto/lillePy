@@ -71,7 +71,7 @@ class stringHandler:
 
     function_names = dir(function)
     for deletion in [
-        "Bunch",
+        # "Bunch",  # Dont think we use this
         "Number",
         "Struct",
         "Variable",
