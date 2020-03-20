@@ -250,7 +250,7 @@ def __call__(*args, **kwargs):
         uin = args[0]
         w = stringHandler(uin)
         split = w.splitted_list()
-        print(split)
+        return split
 
 
 CallableModules.patch()
