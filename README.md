@@ -14,12 +14,12 @@ if a completed object needs to be bug-tested, include a % at the beginning
   #### import of locals from any python venv
   #### make lp send string into function
   #### find better way of finding usr locals
-    read file line by line, determine if locals defined. Only allow lambdas as functions
+    read file line by line, determine if locals defined. Only allow functions as lambdas
   #### make add and mul collapse nicely
 ### IN-WORK
   #### basic string-comprehension and recognition
     bahjemga
-  #### test
+  - do some random shit
 ### COMPLETE
   #### basicFunctions support
   #### import of locals from any python script
