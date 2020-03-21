@@ -346,7 +346,6 @@ local_user_dict = {}
 for elem in uncommon_dir:
     evalElem = eval(f"USERIMPORT.{elem}")
     local_user_dict[str(elem)] = evalElem
-print(local_user_dict)
 R.delete
 failsafe = 1
 # ============================================================
