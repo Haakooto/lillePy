@@ -273,15 +273,31 @@ class Reader:
         self.usr = scriptname
         self.names = []
         self.lines = []
+        self.funcs = []
 
     def read_usr(self):
         with open(f"{self.usr}.py", "r") as usr:
+            in_func = False
+
             for line in usr.readlines():
-                line = line.strip()
-                if self.valid_line(line):
-                    name = line.split("=")[0].strip()
-                    self.names.append(name)
-                    self.lines.append(line)
+                line = line[:line.find("#")]
+                if line[:4] == "def ":
+                    in_func = True
+                    func = [line]
+                    continue
+                if not in_func:
+                    line = line.strip()
+                    if self.valid_line(line):
+                        name = line.split("=")[0].strip()
+                        self.names.append(name)
+                        self.lines.append(line)
+                else:
+                    if line[:4] == "    ":
+                        func.append(line)
+                    else:
+                        self.funcs.append(func)
+                        in_func = False
+
 
     def valid_line(self, line):
         import re
@@ -291,7 +307,11 @@ class Reader:
             # requires propper spacing, which shouldnt be a problem for us, but prob will be, as people are lazy
         n, v = line.split("=")
         value = v.strip()
-
+        if "lambda " in value:
+            name = line.split("=")[0].strip()
+            self.names.append(name)
+            self.funcs.append([line])
+            return False
         if "Variable(" in value:
             return True
         if " lp(" in value:
@@ -313,6 +333,9 @@ class Reader:
         with open(outfile, "w") as our:
             our.write("import lillePy as lp\n")
             our.write("import numpy as np\n")
+            for func in self.funcs:
+                for line in func:
+                    our.write(f"{line}\n")
             for line in self.lines:
                 our.write(f"{line}\n")
 
