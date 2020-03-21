@@ -273,15 +273,16 @@ class Reader:
         self.usr = scriptname
         self.names = []
         self.lines = []
-        self.funcs = []
+        self.imports = []
 
     def read_usr(self):
         with open(f"{self.usr}.py", "r") as usr:
             in_func = False
 
             for line in usr.readlines():
-                line = line[:line.find("#")]
+                line = line[: line.find("#")]
                 if line[:4] == "def ":
+                    self.names.append(line[4 : line.find("(")])
                     in_func = True
                     func = [line]
                     continue
@@ -292,16 +293,41 @@ class Reader:
                         self.names.append(name)
                         self.lines.append(line)
                 else:
-                    if line[:4] == "    ":
+                    if line[:4] in ("    ", "   "):
                         if self.valid_in_func(line):
                             func.append(line)
                     else:
-                        self.funcs.append(func)
+                        self.lines.append(func)
                         in_func = False
-
 
     def valid_line(self, line):
         import re
+
+        if "import" in line:
+            if "*" in line:
+                import time
+
+                print("YOU HAVE COMMITED THE DEALDY SIN OF STAR-IMPORT!")
+                time.sleep(1)
+                print("Prepare to meet the consequenses!")
+                time.sleep(2)
+                import os
+
+                print("Shutting down")
+                os.system("echo -n '\a';sleep 0.1;" * 20)
+                print("Shutdown complete")
+                time.sleep(1)
+                sys.exit()
+            if "from" in line and "as" not in line:
+                names = line[line.find("import") + 6 :].split(",")
+                for name in names:
+                    self.names.append(name.strip())
+            elif "as" in line and "from" not in line:
+                self.names.append(line[line.find("as") + 3 :].strip())
+            elif "as" not in line and "from" not in line:
+                self.names.append(line.split(" ")[1].strip())
+            self.imports.append(line)
+            return False
 
         if " = " not in line:
             return False
@@ -311,20 +337,21 @@ class Reader:
         if "lambda " in value:
             name = line.split("=")[0].strip()
             self.names.append(name)
-            self.funcs.append([line])
+            self.lines.append(line)
             return False
         if "Variable(" in value:
             return True
         if " lp(" in value:
             return False
-        values = re.split("\+ |\*|\-|\/", value)
+        values = re.split("\+|\*|\-|\/", value)
         for expr in values:
             expr = expr.strip()
             try:
                 float(expr)
             except ValueError:
-                if expr[:3] == "np.":
-                    return True
+                if "." in expr:
+                    if expr[: expr.find(".")] in self.imports:
+                        return True
                 if expr not in self.names:
                     return False
             else:
@@ -338,13 +365,17 @@ class Reader:
 
     def write(self, outfile):
         with open(outfile, "w") as our:
-            our.write("import lillePy as lp\n")
-            our.write("import numpy as np\n")
-            for func in self.funcs:
-                for line in func:
-                    our.write(f"{line}\n")
-            for line in self.lines:
+            for line in self.imports:
                 our.write(f"{line}\n")
+
+            # our.write("import lillePy as lp\n")
+            # our.write("import numpy as np\n")
+            for line in self.lines:
+                if isinstance(line, list):
+                    for subline in line:
+                        our.write(f"{subline}\n")
+                else:
+                    our.write(f"{line}\n")
 
     @property
     def delete(self):
@@ -355,6 +386,8 @@ class Reader:
 
 R = Reader(scriptname)
 R.read_usr()
+print(R.names)
+print(R.imports)
 R.write(f"./{tmp_file}.py")
 
 exec(f"import {tmp_file} as USERIMPORT")
@@ -376,6 +409,7 @@ local_user_dict = {}
 for elem in uncommon_dir:
     evalElem = eval(f"USERIMPORT.{elem}")
     local_user_dict[str(elem)] = evalElem
+print(local_user_dict)
 R.delete
 failsafe = 1
 # ============================================================
