@@ -293,7 +293,8 @@ class Reader:
                         self.lines.append(line)
                 else:
                     if line[:4] == "    ":
-                        func.append(line)
+                        if self.valid_in_func(line):
+                            func.append(line)
                     else:
                         self.funcs.append(func)
                         in_func = False
@@ -328,6 +329,12 @@ class Reader:
                     return False
             else:
                 return True
+
+    def valid_in_func(self, line):
+        #######
+        # Should be implemented for proper checks
+        #######
+        return True
 
     def write(self, outfile):
         with open(outfile, "w") as our:
