@@ -265,8 +265,69 @@ else:
         "Error, could not import locals. Lillepy does not yet support import of locals from any python venv. The module can still be used. Clock based events will no longer occur"
     )
 sys.path.append(scriptname)
+tmp_file = "tmp_script"
 
-exec(f"import {scriptname} as USERIMPORT")
+
+class Reader:
+    def __init__(self, scriptname):
+        self.usr = scriptname
+        self.names = []
+        self.lines = []
+
+    def read_usr(self):
+        with open(f"{self.usr}.py", "r") as usr:
+            for line in usr.readlines():
+                line = line.strip()
+                if self.valid_line(line):
+                    name = line.split("=")[0].strip()
+                    self.names.append(name)
+                    self.lines.append(line)
+
+    def valid_line(self, line):
+        import re
+
+        if " = " not in line:
+            return False
+            # requires propper spacing, which shouldnt be a problem for us, but prob will be, as people are lazy
+        n, v = line.split("=")
+        value = v.strip()
+
+        if "Variable(" in value:
+            return True
+        if " lp(" in value:
+            return False
+        values = re.split("\+ |\*|\-|\/", value)
+        for expr in values:
+            expr = expr.strip()
+            try:
+                float(expr)
+            except ValueError:
+                if expr[:3] == "np.":
+                    return True
+                if expr not in self.names:
+                    return False
+            else:
+                return True
+
+    def write(self, outfile):
+        with open(outfile, "w") as our:
+            our.write("import lillePy as lp\n")
+            our.write("import numpy as np\n")
+            for line in self.lines:
+                our.write(f"{line}\n")
+
+    @property
+    def delete(self):
+        import os
+
+        os.remove(f"{tmp_file}.py")
+
+
+R = Reader(scriptname)
+R.read_usr()
+R.write(f"./{tmp_file}.py")
+
+exec(f"import {tmp_file} as USERIMPORT")
 
 uncommon_dir = list(set(pre_import_dir) ^ set(dir(USERIMPORT)))
 uncommon_dir = list(set(uncommon_dir) ^ set(pre_import_dir))
@@ -285,5 +346,7 @@ local_user_dict = {}
 for elem in uncommon_dir:
     evalElem = eval(f"USERIMPORT.{elem}")
     local_user_dict[str(elem)] = evalElem
+print(local_user_dict)
+R.delete
 failsafe = 1
 # ============================================================
