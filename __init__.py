@@ -307,7 +307,7 @@ class Reader:
             if "*" in line:
                 import time
 
-                print("YOU HAVE COMMITED THE DEALDY SIN OF STAR-IMPORT!")
+                print("YOU HAVE COMMITED THE DEADLY SIN OF STAR-IMPORT!")
                 time.sleep(1)
                 print("Prepare to meet the consequenses!")
                 time.sleep(2)
