@@ -3,8 +3,10 @@ The order of this program mst not be changed. It has to be as follows:
 String handling, make modules callable, import locals from user
 """
 
-from .function import *
+# from .function import *
+from .stringHandling import *
 import CallableModules
+import function as f
 
 global local_user_dict, debug, failsafe
 import sys
@@ -189,7 +191,7 @@ class stringHandler:
                     f"routine string[{i}]={self.string[i]}, splitted_expression = {self.splitted_expression}"
                 )
             co = self.string[i]
-            if co in ["+", "-", "/", "*", "÷"]:
+            if co in [var, "+", "-", "/", "*", "÷"]:
                 self.splitted_expression.append(co)
                 i += 1
             elif string_is_number(co):
@@ -240,8 +242,22 @@ class stringHandler:
 """
 Make module callable with other module 'CallableModules'
 """
+import sys
 
 
+class callable:
+    def __call__(self, *args):
+        if failsafe == 1:
+            uin = args[0]
+            w = stringHandler(uin)
+            split = w.splitted_list()
+            w = listComprehension(split)
+            print(split)
+            return eval(w.list_to_expr[0])
+
+
+sys.modules[__name__] = callable()
+"""
 def __call__(*args, **kwargs):
     if failsafe == 1:
         uin = args[0]
@@ -251,6 +267,7 @@ def __call__(*args, **kwargs):
 
 
 CallableModules.patch()
+"""
 # ============================================================
 """
 Importing the users locals. This must be done outside of a function
