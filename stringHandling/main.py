@@ -1,4 +1,7 @@
-from .. import function as f
+try:
+    from .. import function as f
+except:
+    pass
 from numbers import Number
 
 
