@@ -43,6 +43,9 @@ class listComprehension:
             elif string_is_number(obj):
                 il.append(i)
                 i += 1
+            elif obj == "x":
+                il.append(i)
+                i += 1
             if i == len(self.l):
                 break
         return il
@@ -102,15 +105,16 @@ class listComprehension:
             elif isinstance(obj, Number):
                 i += 1
             else:
-                print(i, obj, len(lc), lc)
+                print("ERROR")
             if i == len(lc):
                 break
-        assert len(lc) == 1, f"error, len(lc) = {len(lc)}. Should be 1"
+
+        # assert len(lc) == 1, f"error, len(lc) = {len(lc)}. Should be 1"
         return lc
 
 
-uin = ["f.cos", [3], "*", "f.sin", [2, "*", 3, "f.cos", [3, "*", 43, "*", 23]]]
+# uin = ["f.cos", [3], "*", "f.sin", [2, "*", 3, "f.cos", [3, "*", 43, "*", 23]]]
+# uin = [3, "*", "f.cos", [4, "*", "x"]]
 
-a = listComprehension(uin)
-k = f.cos(2)
-print(eval(a.list_to_expr[0])(1))
+# a = listComprehension(uin).list_to_expr[0]
+# x = f.Variable("x")
