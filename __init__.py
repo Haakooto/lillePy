@@ -278,9 +278,19 @@ class Reader:
     def read_usr(self):
         with open(f"{self.usr}.py", "r") as usr:
             in_func = False
+            in_multiline = False
 
             for line in usr.readlines():
                 line = line[: line.find("#")]
+                if in_multiline:
+                    if '"""' in line:
+                        in_multiline = False
+                        line = line[line.find('"""') :]
+                    else:
+                        continue
+                if '"""' in line:
+                    in_multiline = True
+                    line = line[: line.find('"""')]
                 if line[:4] == "def ":
                     self.names.append(line[4 : line.find("(")])
                     in_func = True
@@ -368,8 +378,6 @@ class Reader:
             for line in self.imports:
                 our.write(f"{line}\n")
 
-            # our.write("import lillePy as lp\n")
-            # our.write("import numpy as np\n")
             for line in self.lines:
                 if isinstance(line, list):
                     for subline in line:
@@ -386,8 +394,6 @@ class Reader:
 
 R = Reader(scriptname)
 R.read_usr()
-print(R.names)
-print(R.imports)
 R.write(f"./{tmp_file}.py")
 
 exec(f"import {tmp_file} as USERIMPORT")
@@ -409,7 +415,6 @@ local_user_dict = {}
 for elem in uncommon_dir:
     evalElem = eval(f"USERIMPORT.{elem}")
     local_user_dict[str(elem)] = evalElem
-print(local_user_dict)
 R.delete
 failsafe = 1
 # ============================================================
