@@ -1,7 +1,7 @@
 from .. import function as f
 from numbers import Number
 import os
-import json
+import ast
 
 path_here = os.getcwd()
 local_user_dict = {}
@@ -12,7 +12,7 @@ try:
         print(inn, "thisisinnandwewanttitohavethings")
 
         print("iwilnotbegone")
-        local_user_dict = json.loads(inn)
+        local_user_dict = ast.literal_eval(inn)
         print("iwilbegone")
 except:
     pass
