@@ -248,11 +248,12 @@ import sys
 class callable:
     def __call__(self, *args):
         if failsafe == 1:
+            x = f.Variable("x")
             uin = args[0]
             w = stringHandler(uin)
             split = w.splitted_list()
             w = listComprehension(split)
-            print(split)
+
             return eval(w.list_to_expr[0])
 
 
