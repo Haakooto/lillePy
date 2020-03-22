@@ -434,7 +434,7 @@ local_user_dict = {}
 for elem in uncommon_dir:
     evalElem = eval(f"USERIMPORT.{elem}")
     local_user_dict[str(elem)] = evalElem
-print(sys.argv)
+
 R.delete
 failsafe = 1
 # ============================================================

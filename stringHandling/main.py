@@ -3,7 +3,24 @@ try:
 except:
     pass
 from numbers import Number
+import os
+import json
 
+path_here = os.getcwd()
+local_user_dict = {}
+
+try:
+    with open(f"{path_here}/dict.txt", "r") as file:
+        inn = file.readline()
+        print(inn, "thisisinnandwewanttitohavethings")
+
+        print("iwilnotbegone")
+        local_user_dict = json.loads(inn)
+        print("iwilbegone")
+except:
+    pass
+
+print(local_user_dict, "thisisthething")
 
 def string_is_number(obj):
     try:
