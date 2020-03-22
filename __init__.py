@@ -5,7 +5,7 @@ String handling, make modules callable, import locals from user
 
 # from .function import *
 from .stringHandling import *
-import function as f
+# import function as f
 
 global local_user_dict, debug, failsafe
 import sys
@@ -432,6 +432,12 @@ local_user_dict = {}
 for elem in uncommon_dir:
     evalElem = eval(f"USERIMPORT.{elem}")
     local_user_dict[str(elem)] = evalElem
+
 R.delete
+import os
+# print(local_user_dict)
+path_here = os.getcwd()
+with open(f"{path_here}/dict.txt", "w") as file:
+    file.write(str(local_user_dict))
 failsafe = 1
 # ============================================================
