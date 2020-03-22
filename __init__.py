@@ -2,10 +2,12 @@
 The order of this program mst not be changed. It has to be as follows:
 String handling, make modules callable, import locals from user
 """
+import function
 
 # from .function import *
+
 from .stringHandling import *
-# import function as f
+from . import function as f
 
 global local_user_dict, debug, failsafe
 import sys
@@ -434,10 +436,5 @@ for elem in uncommon_dir:
     local_user_dict[str(elem)] = evalElem
 
 R.delete
-import os
-# print(local_user_dict)
-path_here = os.getcwd()
-with open(f"{path_here}/dict.txt", "w") as file:
-    file.write(str(local_user_dict))
 failsafe = 1
 # ============================================================
