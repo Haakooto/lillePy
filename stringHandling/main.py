@@ -1,4 +1,4 @@
-import function as f
+from .. import function as f
 from numbers import Number
 
 

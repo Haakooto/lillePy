@@ -5,7 +5,6 @@ String handling, make modules callable, import locals from user
 
 # from .function import *
 from .stringHandling import *
-import CallableModules
 import function as f
 
 global local_user_dict, debug, failsafe
