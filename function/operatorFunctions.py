@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 from numbers import Number
+from .subandsuperscript import superscript as susc
+
 
 from .Variable import Variable, Struct
 from .parents import parentFunction, parentOperator
@@ -52,6 +54,7 @@ class mul(parentOperator):
             res *= obj ** coeff
 
         return res
+
 
     def string(self, *args):
         res = ""
@@ -122,6 +125,27 @@ class div(mul):
             self.structure["number"] /= b
         else:
             self.append_to_structure(b, "sd")
+
+    def string(self, *args):
+        res = ""
+        empty = lambda: res == ""
+        for thing, coeff in self.structure.items():
+            if thing == "number" and coeff != self.null_value:
+                res += str(coeff)
+            elif isinstance(thing, (parentFunction, parentOperator, Variable)):
+                if empty():
+                    res += "/"
+                if coeff == 1:
+                    c = ""
+                else:
+                    c = f"^{coeff}"
+
+                if isinstance(thing, Variable):
+                    d = str(thing)
+                else:
+                    d = f"({str(thing)})"
+                res += f"{d}{c}"
+        return res
 
 
 class pow(parentOperator):
