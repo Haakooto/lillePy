@@ -2,7 +2,8 @@
 The order of this program mst not be changed. It has to be as follows:
 String handling, make modules callable, import locals from user
 """
-from . import function
+from . import function as f
+from numbers import Number
 import sys
 
 
@@ -242,15 +243,26 @@ class listComprehension:
     def __init__(self, l):
         self.l = l
 
-    def find_div_seq(self, i):
+    def divform(self, indexes):
+        res = "f.div("
+        for i in indexes:
+            res += f"{self.l[i]},"
+        return res[:-1] + ")"
+
+    def find_operator_seq_simple(self, i):
         if i > 1:
             if self.l[i - 2][:2] == "f.":
                 il = [i - 2, i - 1]
         else:
             il = [i - 1]
-        return il + [i + 1]
+        if self.l[i + 1][:2] == "f.":
+            il.append(i + 1)
+            il.append(i + 2)
+        else:
+            il.append(i + 1)
+        return il
 
-    def find_mul_seq(self, i):
+    def find_operator_seq_multi(self, opr_symbol, i):
         if i > 1:
             if self.l[i - 2][:2] == "f.":
                 il = [i - 2, i - 1]
@@ -259,7 +271,8 @@ class listComprehension:
 
         while True:
             obj = self.l[i]
-            if obj == "*":
+
+            if obj == opr_symbol:
                 i += 1
             elif str(obj)[:2] == "f.":
                 il.append(i)
@@ -278,8 +291,8 @@ class listComprehension:
                 break
         return il
 
-    def mulform(self, indexes):
-        res = "f.mul("
+    def opr_form_multi(self, opr_name, indexes):
+        res = f"f.{opr_name}("
         i = 0
         while True:
             index = indexes[i]
@@ -304,6 +317,7 @@ class listComprehension:
         lc = self.l[:]
         while True:
             obj = self.l[i]
+            print(obj)
             if type(obj) == list:
                 if i > 1:
                     if str(self.l[i - 1])[:2] == "f.":
@@ -316,19 +330,27 @@ class listComprehension:
             elif str(obj)[:2] == "f.":
                 i += 1
             elif obj == "*":
-                mul_seq = self.find_mul_seq(i)
+                mul_seq = self.find_operator_seq_multi("*", i)
                 lc = lc[: mul_seq[0]] + lc[mul_seq[-1] :]
-                lc[mul_seq[0]] = self.mulform(mul_seq)
+                lc[mul_seq[0]] = self.opr_form_multi("mul", mul_seq)
                 addlen = mul_seq[-1] - i - len(self.l[mul_seq[0] : mul_seq[-1]])
                 i += addlen
             elif obj == "/":
                 assert i > 0, f"Error in division expression around string index {i}"
-                div_seq = self.find_div_seq(i)
+                div_seq = self.find_operator_seq_simple(i)
                 lc = lc[: div_seq[0]] + lc[div_seq[-1] :]
-                lc[mul_seq[0]] = self.divform(div_seq)
+                lc[div_seq[0]] = self.divform(div_seq)
+                addlen = div_seq[-1] - i - len(self.l[div_seq[0] : div_seq[-1]])
+                i += addlen
+            elif obj == "+":
+                add_seq = self.find_operator_seq_multi("+", i)
+                lc = lc[: add_seq[0]] + lc[add_seq[-1] :]
+                lc[add_seq[0]] = self.opr_form_multi("add", add_seq)
+                addlen = add_seq[-1] - i - len(self.l[add_seq[0] : add_seq[-1]])
+                i += addlen
             elif obj == "x":
                 i += 1
-            elif obj in ["+", "-"]:
+            elif obj in ["-"]:
                 i += 1
             elif isinstance(obj, Number):
                 i += 1
@@ -360,7 +382,7 @@ class lillepy:
             return eval(w.list_to_expr[0])
 
 
-sys.modules[__name__] = callable()
+sys.modules[__name__] = lillepy()
 
 # ============================================================
 """
