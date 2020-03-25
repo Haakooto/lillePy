@@ -377,9 +377,9 @@ class lillepy:
             uin = args[0]
             w = stringHandler(uin)
             split = w.splitted_list()
-            w = listComprehension(split)
-
-            return eval(w.list_to_expr[0])
+            # w = listComprehension(split)
+            print(split)
+            # return eval(w.list_to_expr[0])
 
 
 sys.modules[__name__] = lillepy()
