@@ -15,7 +15,7 @@ local_user_dict = {}
 
 
 """
-String handling
+String handling.
 """
 
 
