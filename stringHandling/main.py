@@ -108,10 +108,30 @@ class listHandler:
         print(res, "res")
         return res
 
+
+    def seq_combiner(self, add_seq, mul_seq):
+        add_seq, mul_seq = add_seq[:], mul_seq[:]
+        switch = {'add_seq':'mul_seq', 'mul_seq':'add_seq'}
+        curr_seq = 'mul_seq'
+        if add_seq[0][0] < mul_seq[0][0]:
+            curr_seq = 'add_seq'
+        res = []
+        while True:
+            res.append(eval(curr_seq)[0])
+            eval(curr_seq).pop(0)
+            curr_seq = switch[curr_seq]
+            if len(add_seq) == len(mul_seq) == 0:
+                break
+        return res
+
+
+
+
     @property
     def construct_function(self):
         mul_seq = listify_from_break(self.locate_operator_sequence("*"))
         add_seq = listify_from_break(self.locate_operator_sequence("+"))
+        print(self.seq_combiner(add_seq,mul_seq),'seq combiner','combined')
         print(mul_seq, "mul_seq")
         print(add_seq, "add_seq")
 
@@ -128,7 +148,7 @@ class listHandler:
                 mulstop = parent_obj[-1]
 
             for j, parent_obj in enumerate(mul_seq):
-                res = "f.mul("
+                mulres = "f.mul("
                 for i, obj in enumerate(parent_obj):
                     print(obj, "obj")
                     if type(obj) == list:
@@ -141,31 +161,29 @@ class listHandler:
                             call_obj = listHandler(
                                 self.l[obj[0] + 1]
                             ).construct_function
-                            res += f"{call_obj},"
+                            mulres += f"{call_obj},"
                     elif str(self.l[obj])[:2] == "f.":
                         print(f"obj {obj} is function")
                         call_obj = listHandler(self.l[obj + 1]).construct_function
                         print(call_obj, "call_obj")
-                        res += f"{self.l[obj]}({call_obj}),"
+                        mulres += f"{self.l[obj]}({call_obj}),"
                     else:
                         print("object is neither")
-                        res += f"{self.l[obj]},"
-                total.append(res[:-1] + ")")
+                        mulres += f"{self.l[obj]},"
+                total.append(mulres[:-1] + ")")
             print(total, "total")
             addres = "f.add("
-            if len(mul_seq) < len(add_seq):
-                mul_seq += [None]
-                total += [None]
-            for i, (fmul, mulidx, addidx) in enumerate(zip(total, mul_seq, add_seq)):
-                print(i, fmul, addidx, mulidx)
-
+            for i,obj in enumerate(add_seq):
+                if obj[0] != 0:
+                    addres += mulres[0]
+            
             return total
             # print(mulstart, mulstop)
 
-
+uin = [2, "+", 1, "+", 34, "*", 45, "+", 8, "+", 24, "*", 9, "+", 88888, '+', 23, '*', 1]
 w = listHandler(
     # ["f.sin", ["2", "*", "5"]]
-    [2, "*", 1, "+", 34, "*", 45, "+", 8, "+", 24, "*", 9, "+", 88888]
+    uin
     # ["x", "*", "2", "*", "f.sin", [2, "*", 3], "+", 4, "*", 1, "*", 8, "+", "x", "*", 4]
 )
 w.construct_function
