@@ -55,7 +55,6 @@ class mul(parentOperator):
 
         return res
 
-
     def string(self, *args):
         res = ""
         for thing, coeff in self.structure.items():
@@ -128,12 +127,13 @@ class div(mul):
 
     def string(self, *args):
         res = ""
-        empty = lambda: res == ""
         for thing, coeff in self.structure.items():
+            coeff = abs(coeff)
             if thing == "number" and coeff != self.null_value:
                 res += str(coeff)
             elif isinstance(thing, (parentFunction, parentOperator, Variable)):
-                if empty():
+                print(res)
+                if res != "":
                     res += "/"
                 if coeff == 1:
                     c = ""
