@@ -98,3 +98,7 @@ class Struct(dict):
 
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
+
+    def copy(self):
+        new = Struct({**self})
+        return new
