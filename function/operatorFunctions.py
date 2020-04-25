@@ -21,6 +21,8 @@ class add(parentOperator):
     def string(self, *args):
         res = ""
         for thing, coeff in self.structure.items():
+            if coeff == 0:
+                continue
             if thing == "number" and coeff != 0:
                 res += str(coeff)
             if isinstance(thing, Variable):
@@ -58,7 +60,9 @@ class mul(parentOperator):
     def string(self, *args):
         res = ""
         for thing, coeff in self.structure.items():
-            if thing == "number" and coeff != 0:
+            if coeff == 0:
+                continue
+            if thing == "number" and coeff != 1:
                 res += str(coeff)
             if isinstance(thing, Variable):
                 if res != "":
