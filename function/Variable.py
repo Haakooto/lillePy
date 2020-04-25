@@ -97,7 +97,10 @@ class Struct(dict):
             sys.exit()
 
     def __hash__(self):
-        return hash(tuple(sorted(self.items())))
+        h = 0
+        for obj in self.items():
+            h += hash(obj)
+        return h
 
     def copy(self):
         new = Struct({**self})
