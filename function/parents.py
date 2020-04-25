@@ -116,14 +116,21 @@ class parentOperator:
                 self.structure = type(self).call(
                     self, obj.structure, res=self.structure
                 )
-            # elif self.null_value == 0 and obj.null_value == 1:
-            #     if len(obj.structure) == 2:
-            #         self.structure = type(self).call(
-            #             self,
-            #             obj.structure.exclude_num(),
-            #             res=self.structure,
-            #             coeff=obj.structure["number"],
-            #         )
+            elif self.null_value == 0 and obj.null_value == 1:
+                new = obj.copy()
+                coeff = new.structure["number"]
+                new.structure["number"] = new.null_value
+                if new in self.structure:
+                    self.structure[new] += coeff
+                else:
+                    self.structure[new] = coeff
+
+            elif self.null_value == 1 and obj.null_value == 0:
+                new = obj.copy()
+                if new in self.structure:
+                    self.structure += 1
+                else:
+                    self.structure[new] = 1
 
         elif obj in self.structure:
             if am_sd == "am":
@@ -135,6 +142,9 @@ class parentOperator:
                 self.structure[obj] = 1
             else:
                 self.structure[obj] = -1
+
+    def __getitem__(self, num):
+        return self.structure
 
     def res_coeff(self, *args, **kwargs):
         if "res" not in kwargs:
@@ -188,6 +198,11 @@ class parentOperator:
 
     def __repr__(self):
         return self.repr()
+
+    def copy(self):
+        new = type(self)(1, 1)
+        new.structure = self.structure.copy()
+        return new
 
     def validate_init_structure(self):
 
