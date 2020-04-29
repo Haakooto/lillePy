@@ -2,12 +2,9 @@ class Parser:
     def parseAdd(string, isChild=False):
         # this method will replace the elemtens added in a string with a
         # lillepy-expression on the form: a+b+c -> lp.Add(a,b,c)
-        # It will not work on nested add elements. I.e:
-        # a+(b+c) -> lp.Add(a,(b+c)).
-        # A different method (Not yet implemented) will convert a+(b+c)->a+b+c
 
         # isChild has to be set to True when the parseAdd method is called
-        # recursively within itseøf
+        # recursively within itself. See comment ~50 lines down
 
         addIndices = Parser.locateSymbol(string, "+")
 
@@ -19,7 +16,7 @@ class Parser:
                 possibleAddIndices = Parser.locateSymbol(string, "+", opening, closing)
                 if possibleAddIndices != []:
                     for addIndex in possibleAddIndices:
-                        # this is a bodge but it works
+                        # this is a bodge, but it works
                         try:
                             addIndices.remove(addIndex)
                         except:
@@ -33,6 +30,7 @@ class Parser:
             prev = index + 1
             if index == addIndices[-1]:
                 toBeAdded.append(string[index + 1 :])
+            
         # we then create a string ready to be evaluated by lillepy by iterating
         # through the toBeAdded elements.
         addString = "lp.Add("
@@ -59,8 +57,12 @@ class Parser:
         else:
             return addString[:-1]
 
+    def parseMul(string, isChild=False):
+        ''' In a normal parsing sequence, the parseMul method would be called
+            right after parseMul'''
+
+
     def locateClosingParenthesis(string, index):
-        print(string, index)
         # this function finds the index of the closing parenthesis in a string
         # index is the index of the parenthesis we wish to find
         # its closed counterpart to
@@ -95,8 +97,6 @@ class Parser:
         return indicies
 
 
-foo = "6+cos(3+34+(51*19))+724+345+2*sin(43+2)"
+foo = "(2+3)*456"
 res = Parser.parseAdd(foo)
-# res = Parser.locateClosingParenthesis(foo, 5)
 print(res)
-# lp.Add(6,cos(lp.Add(3,34,(51*19)))),724,345,2*sin(lp.Add(43,2))))
