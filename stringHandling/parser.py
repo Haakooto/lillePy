@@ -43,7 +43,7 @@ class Parser:
                     optionalPar = {'L':'', 'R':''}
 
                 # we add to the build
-                build += f'{optionalPar["L"]}lp.Add({Parser.parseAdd(string[opening+1:closing])}){optionalPar["R"]}'
+                build += f'{optionalPar["L"]}lp.Add({Parser.parseAdd(string[opening+1:closing], isChild=True)}){optionalPar["R"]}'
 
                 #Finally we continue past the parenthesis with the next() function
                 for foo in range(closing-opening):
@@ -136,6 +136,6 @@ class Parser:
 fNames = ['sin', 'cos', 'tan','log','ln', 'arcsin','arccos', 'acos','asin']
 
 
-foo = "2+sin(34*(2+1))*2+3"
+foo = "2+sin(34*(2+1))*(2+3)"
 res = Parser.parseAdd(foo)
 print(res)
