@@ -1,11 +1,12 @@
 
 class Parser:
-    def parseAdd(string, isChild = False):
-        # isChild is documented below
+    def parseAdd(string, includeAdd = True):
         '''this method will replace the elemtens added in a string with a
-        lillepy-expression on the form: a+b+c -> lp.Add(a,b,c)'''
+        lillepy-expression on the form: a+b+c -> lp.Add(a,b,c).
+        includeAdd is optional argument of wether the parser should return
+        the result with our without the lp.Add( ... ) around the result'''
 
-        #remove any whitespace from the string
+
         string = string.replace(' ','')
 
         '''First we do a quick check to check if the string actually has any
@@ -13,28 +14,29 @@ class Parser:
         parSections = Parser.locateParSections(string)
         searchString = Parser.cutSections(string, parSections)
         if '+' not in searchString:
-            return string
+            includeAdd = False
 
-        build = '' # empty string to be constructed into the parsed result
+        build = ''
 
         addIndices = Parser.locateSymbol(string, "+")
-        iterString = iter(enumerate(string)) # iteratable object
+        iterString = iter(enumerate(string))
+
         for index, obj in iterString:
 
             if obj == '+':
                 build += ','
 
             elif obj == "(":
-                #locate the opening and closing pars
                 opening = index
+
                 closing = Parser.locateClosingParenthesis(string, index)
 
                 '''if there are no additions in the parenthesis, we of course skip this section.
                 However we need to be careful when checking the section for plus signs,
                 as any plussigns within another parenthesises will NOT count towards
                 deciding wether our surrent parenthesis group has addidion in it'''
-                parSections = Parser.locateParSections(string[opening+1:closing])
-                searchString = Parser.cutSections(string[opening+1:closing][:], parSections)
+                parSections = Parser.locateParSections(string[opening+1:closing+1])
+                searchString = Parser.cutSections(string[opening+1:closing+1][:], parSections)
                 if '+' not in searchString:
                     build += '('
                     continue
@@ -50,7 +52,7 @@ class Parser:
                     optionalPar = {'L':'', 'R':''}
 
                 # we add to the build
-                build += f'{optionalPar["L"]}lp.Add({Parser.parseAdd(string[opening+1:closing], isChild=True)}){optionalPar["R"]}'
+                build += f'{optionalPar["L"]}lp.Add({Parser.parseAdd(string[opening+1:closing+1], includeAdd=False)}){optionalPar["R"]}'
 
                 #Finally we continue past the parenthesis with the next() function
                 for foo in range(closing-opening):
@@ -60,15 +62,77 @@ class Parser:
                 build += obj
         '''We will only add an lp.Add() around the return object if the called parse
             is not a child of any other ongoing parse.'''
-        if isChild:
-            return build
-        else:
+        if includeAdd:
             return f'lp.Add({build})'
+        else:
+            return build
 
 
-    def parseMul(string, isChild=False):
-        ''' In a normal parsing sequence, the parseMul method would be called
-            right after parseMul'''
+    def parseMul(string, includeMul = True):
+        '''this method will replace the elemtens added in a string with a
+        lillepy-expression on the form: a+b+c -> lp.Add(a,b,c).
+        includeAdd is optional argument of wether the parser should return
+        the result with our without the lp.Add( ... ) around the result'''
+
+
+        string = string.replace(' ','')
+
+        '''First we do a quick check to check if the string actually has any
+        sums in its current parenthesis group'''
+        parSections = Parser.locateParSections(string)
+        searchString = Parser.cutSections(string, parSections)
+        if '*' not in searchString:
+            includeAdd = False
+
+        build = ''
+
+        addIndices = Parser.locateSymbol(string, "*")
+        iterString = iter(enumerate(string))
+
+        for index, obj in iterString:
+
+            if obj == '*':
+                build += ','
+
+            elif obj == "(":
+                opening = index
+                closing = Parser.locateClosingParenthesis(string, index)
+
+                '''if there are no additions in the parenthesis, we of course skip this section.
+                However we need to be careful when checking the section for plus signs,
+                as any plussigns within another parenthesises will NOT count towards
+                deciding wether our surrent parenthesis group has addidion in it'''
+                parSections = Parser.locateParSections(string[opening+1:closing+1])
+                searchString = Parser.cutSections(string[opening+1:closing+1][:], parSections)
+                if '*' not in searchString:
+                    build += '('
+                    continue
+
+                '''next we determine if the par is either a function call or a group.
+                    we do this because in some instances,
+                    we wish to keep the parenthesis, i.e in sin(2+x)->sin(lp.Add(2,x)),
+                    and in some cases, we do no not, i.e (2+3)*8 -> lp.Add(2,3)*8'''
+                isFuncGroup = Parser.parIsFunctionGroup(string, index)
+                if isFuncGroup:
+                    optionalPar = {'L':'(', 'R':')'}
+                else:
+                    optionalPar = {'L':'', 'R':''}
+
+                # we add to the build
+                build += f'{optionalPar["L"]}lp.Mul({Parser.parseMul(string[opening+1:closing+1], includeMul=False)}){optionalPar["R"]}'
+
+                #Finally we continue past the parenthesis with the next() function
+                for foo in range(closing-opening):
+                    next(iterString)
+
+            else:
+                build += obj
+        '''We will only add an lp.Add() around the return object if the called parse
+            is not a child of any other ongoing parse.'''
+        if includeMul:
+            return f'lp.Mul({build})'
+        else:
+            return build
 
 
     def locateClosingParenthesis(string, index):
@@ -76,7 +140,6 @@ class Parser:
         # index is the index of the parenthesis we wish to find
         # its closed counterpart to
         assert string[index] == "(", f'expected symbol "(", got {string[index]}'
-
         # this is how many '(' are between the current parenthesis and the fisr cllsing parenthesis
         start_par_amount = string[index + 1 : index + string[index:].index(")")].count(
             "("
@@ -140,9 +203,13 @@ class Parser:
         return str(letterList)
 
 
-fNames = ['sin', 'cos', 'tan','log','ln', 'arcsin','arccos', 'acos','asin']
+fNames = ['sin', 'cos', 'tan','log','ln', 'arcsin','arccos', 'acos','asin', 'Add','Mul']
 
 
-foo = "2+sin(34*(2+1))*(2+3*sin(9+7+2))"
-res = Parser.parseAdd('32')
-print(res)
+foo = "2+sin(2+3*x)"
+a = "lp.Add(2,sin(34*lp.Add(2,1))*lp.Add(2,3*sin(lp.Add(9,7,2))))"
+
+#Feilen ligger nok i indekseringen der oppe ett sted... ikke sikker på hvor da lol
+res = Parser.parseMul(foo)
+print(res,'res')
+print(Parser.parseAdd(res))
