@@ -8,6 +8,13 @@ class Parser:
         #remove any whitespace from the string
         string = string.replace(' ','')
 
+        '''First we do a quick check to check if the string actually has any
+        sums in its current parenthesis group'''
+        parSections = Parser.locateParSections(string)
+        searchString = Parser.cutSections(string, parSections)
+        if '+' not in searchString:
+            return string
+
         build = '' # empty string to be constructed into the parsed result
 
         addIndices = Parser.locateSymbol(string, "+")
@@ -136,6 +143,6 @@ class Parser:
 fNames = ['sin', 'cos', 'tan','log','ln', 'arcsin','arccos', 'acos','asin']
 
 
-foo = "2+sin(34*(2+1))*(2+3)"
-res = Parser.parseAdd(foo)
+foo = "2+sin(34*(2+1))*(2+3*sin(9+7+2))"
+res = Parser.parseAdd('32')
 print(res)
