@@ -1,5 +1,6 @@
 class Parser:
     initKwargs = {"includeAdd": True, "includeMul": True}
+    oprSymbolDict = {"+": "Add", "*": "Mul"}
 
     def parse(string, **kwargs):
         """Due to the nature of the dict().get() function returning None
@@ -7,8 +8,8 @@ class Parser:
         if kwargs == {}:
             kwargs = Parser.initKwargs.copy()
 
-        build = Parser.parseAdd(string, includeAdd=kwargs.get("includeAdd"))
-        # build = Parser.parseMul(build, includeMul=kwargs.get("includeMul"))
+        build = Parser.parseOpr(string, opr="+", includeOpr=kwargs.get("includeAdd"))
+        build = Parser.parseOpr(build, opr="*", includeOpr=kwargs.get("includeMul"))
         return build
 
     def parseAdd(string, **kwargs):
@@ -21,89 +22,92 @@ class Parser:
 
         string = string.replace(" ", "")
 
-        """First we do a quick check to check if the string actually has any
-        sums in its current parenthesis group"""
+        build = ""
+
         parSections = Parser.locateParSections(string)
         searchString = Parser.cutSections(string, parSections)
 
         if "+" not in searchString:
             includeAdd = False
 
-        build = ""
-
         addIndices = Parser.locateSymbol(string, "+")
         iterString = iter(enumerate(string))
 
         for index, obj in iterString:
 
-            if obj == "+":
-                build += ","
-                continue
-
-            elif obj == "(":
+            if obj == "(":
                 opening = index
-
                 closing = Parser.locateClosingParenthesis(string, index)
-
-                """if there are no additions in the parenthesis, we of course skip this section.
-                However we need to be careful when checking the section for plus signs,
-                as any plussigns within another parenthesises will NOT count towards
-                deciding wether our surrent parenthesis group has addidion in it"""
-                """We separate the string into severalt sections of interest (SOI). these
-                sections do not include parenthseis groups of lower order, separators like "," etc."""
-                parSections = Parser.locateParSections(string[opening + 1 : closing])
-                searchString = Parser.cutSections(
-                    string[opening + 1 : closing][:], parSections
-                )
-                # commaLocations = Parser.locateSymbol(searchString, ",")
-                # searchString = list(searchString)
-                # for loc in commaLocations:
-                #    del searchString[loc]
-                # searchString = "".join(searchString)
-                # print(f"searchString: {searchString}")
-                if "+" not in searchString:
-                    build += "("
-                    continue
 
                 """next we determine if the par is either a function call or a group.
                     we do this because in some instances,
                     we wish to keep the parenthesis, i.e in sin(2+x)->sin(lp.Add(2,x)),
                     and in some cases, we do no not, i.e (2+3)*8 -> lp.Add(2,3)*8"""
                 isFuncGroup = Parser.parIsFunctionGroup(string, index)
+                """If it is a function ,we need to account for the ',' and end any operation there,
+                    meanwhile including the "," in the original operator"""
                 if isFuncGroup:
-                    optionalPar = {"L": "(", "R": ")"}
-                else:
-                    optionalPar = {"L": "", "R": ""}
+                    print("d")
+                    build += "("
+                    # callSections are the areas between any ","'s
+                    callSections = Parser.locateFunctionCallSections(
+                        string[opening : closing + 1], zero=opening
+                    )
+                    for sec in callSections:
+                        stringSection = string[sec[0] : sec[-1] + 1]
+                        parSections = Parser.locateParSections(stringSection)
+                        searchString = Parser.cutSections(stringSection[:], parSections)
+                        build += (
+                            Parser.parse(
+                                stringSection, includeAdd=("+" in searchString)
+                            )
+                            + ","
+                        )
+                        for k in range(len(stringSection) + 1):
+                            next(iterString)
+                    build = build[:-1] + ")"
 
-                # we add to the build
-                build += f'{optionalPar["L"]}lp.Add({Parser.parse(string[opening+1:closing], includeAdd=False)}){optionalPar["R"]}'
+                if not isFuncGroup:
+                    """If the parenthesis is not a function but just any normal parenthesis, we do not need to bother
+                        with checking for the commas"""
+                    stringSection = string[opening + 1 : closing]
+                    build += {Parser.parse(stringSection, includeAdd=True)}
 
-                """Finally we continue past the parenthesis with the next() function.
-                    However, if there are any "," to the r"""
-
-                for foo in range(closing - opening):
-                    next(iterString)
+                    for k in range(len(stringSection) + 1):
+                        next(iterString)
+            elif obj == "+":
+                build += ","
+                continue
 
             else:
                 build += obj
         """We will only add an lp.Add() around the return object if the called parse
             is not a child of any other ongoing parse."""
         if includeAdd:
-            return f"lp.Add({build})"
-        else:
-            return build
+            build = f"lp.Add({build})"
+        return build
 
     def parseMul(string, **kwargs):
-        """parseMul will typically be called AFTER parseAdd, and we therefore need
-            to do some extra checks"""
+        """this method will replace the elemtens added in a string with a
+        lillepy-expression on the form: a+b+c -> lp.Add(a,b,c).
+        includeAdd is optional argument of wether the parser should return
+        the result with our without the lp.Add( ... ) around the result"""
 
         includeMul = kwargs.get("includeMul")
 
-        build = ""
-
         string = string.replace(" ", "")
 
+        build = ""
+
+        parSections = Parser.locateParSections(string)
+        searchString = Parser.cutSections(string, parSections)
+
+        if "*" not in searchString:
+            includeMul = False
+
+        addIndices = Parser.locateSymbol(string, "*")
         iterString = iter(enumerate(string))
+
         for index, obj in iterString:
 
             if obj == "*":
@@ -111,33 +115,123 @@ class Parser:
                 continue
 
             elif obj == "(":
-
                 opening = index
                 closing = Parser.locateClosingParenthesis(string, index)
 
-                """If we encounter a par we need to check wether the par is part
-                    of a function or a multiplication"""
-                isOprGroup = Parser.parIsFunctionGroup(string, index, ["Add", "Sub"])
-
-                if isOprGroup:
-                    # if this is the case, we need to stop including objects in our
-                    # operator at the first instance of a "," or any other separator
-
-                    build += f"(lp.Mul({Parser.parse(string[opening+1:closing], includeMul=False)}))"
-                    separatorIndices = Parser.locateSymbol(
-                        string[opening:closing], ",",
+                """next we determine if the par is either a function call or a group.
+                    we do this because in some instances,
+                    we wish to keep the parenthesis, i.e in sin(2+x)->sin(lp.Add(2,x)),
+                    and in some cases, we do no not, i.e (2+3)*8 -> lp.Add(2,3)*8"""
+                isFuncGroup = Parser.parIsFunctionGroup(string, index)
+                """If it is a function ,we need to account for the ',' and end any operation there,
+                    meanwhile including the "," in the original operator"""
+                if isFuncGroup:
+                    build += "("
+                    # callSections are the areas between any ","'s
+                    callSections = Parser.locateFunctionCallSections(
+                        string[opening : closing + 1], zero=opening
                     )
-                    for separatorIndex in separatorIndices:
-                        pass
+                    for sec in callSections:
+                        stringSection = string[sec[0] : sec[-1] + 1]
+                        parSections = Parser.locateParSections(stringSection)
+                        searchString = Parser.cutSections(stringSection[:], parSections)
+                        build += f"{Parser.parse(stringSection, includeMul = '*' in searchString)},"
+                        for k in range(len(stringSection) + 1):
+                            # skip te remaining part of the parenthesis
+                            next(iterString)
+                    build = build[:-1] + ")"
 
-            elif obj == ",":
-                pass
+                if not isFuncGroup:
+                    """If the parenthesis is not a function but just any normal parenthesis, we do not need to bother
+                        with checking for the commas"""
+                    stringSection = string[opening + 1 : closing]
+                    build += (
+                        f"lp.Mul({Parser.parse(stringSection, includeMul = False)})"
+                    )
+                    for k in range(len(stringSection) + 1):
+                        next(iterString)
+
             else:
                 build += obj
+        """We will only add an lp.Add() around the return object if the called parse
+            is not a child of any other ongoing parse."""
         if includeMul:
-            return f"lp.Mul({build})"
-        else:
-            return build
+            build = f"lp.Mul({build})"
+        return build
+
+    def parseOpr(string, **kwargs):
+        opr = kwargs.get("opr")
+        """this method will replace the elemtens added in a string with a
+        lillepy-expression on the form: a+b+c -> lp.Add(a,b,c).
+        includeAdd is optional argument of wether the parser should return
+        the result with our without the lp.Add( ... ) around the result"""
+
+        includeOpr = kwargs.get("includeOpr")
+        string = string.replace(" ", "")
+
+        build = ""
+
+        parSections = Parser.locateParSections(string)
+        searchString = Parser.cutSections(string, parSections)
+
+        if opr not in searchString:
+            includeOpr = False
+
+        oprIndices = Parser.locateSymbol(string, opr)
+        iterString = iter(enumerate(string))
+
+        for index, obj in iterString:
+
+            if obj == "(":
+                opening = index
+                closing = Parser.locateClosingParenthesis(string, index)
+
+                """next we determine if the par is either a function call or a group.
+                    we do this because in some instances,
+                    we wish to keep the parenthesis, i.e in sin(2+x)->sin(lp.Add(2,x)),
+                    and in some cases, we do no not, i.e (2+3)*8 -> lp.Add(2,3)*8"""
+                isFuncGroup = Parser.parIsFunctionGroup(string, index)
+                """If it is a function ,we need to account for the ',' and end any operation there,
+                    meanwhile including the "," in the original operator"""
+                if isFuncGroup:
+                    build += "("
+                    # callSections are the areas between any ","'s
+                    callSections = Parser.locateFunctionCallSections(
+                        string[opening : closing + 1], zero=opening
+                    )
+                    for sec in callSections:
+                        stringSection = string[sec[0] : sec[-1] + 1]
+                        parSections = Parser.locateParSections(stringSection)
+                        searchString = Parser.cutSections(stringSection[:], parSections)
+
+                        build += eval(
+                            f'Parser.parse(stringSection, include{Parser.oprSymbolDict[opr]} = {opr in searchString}) + ","'
+                        )
+
+                        for k in range(len(stringSection) + 1):
+                            next(iterString)
+                    build = build[:-1] + ")"
+
+                if not isFuncGroup:
+                    """If the parenthesis is not a function but just any normal parenthesis, we do not need to bother
+                        with checking for the commas"""
+                    stringSection = string[opening + 1 : closing]
+                    build += eval(
+                        f"Parser.parse(stringSection, include{Parser.oprSymbolDict[opr]} = True)"
+                    )
+                    for k in range(len(stringSection) + 1):
+                        next(iterString)
+            elif obj == opr:
+                build += ","
+                continue
+
+            else:
+                build += obj
+        """We will only add an lp.Add() around the return object if the called parse
+            is not a child of any other ongoing parse."""
+        if includeOpr:
+            build = f"lp.{Parser.oprSymbolDict[opr]}({build})"
+        return build
 
     def locateClosingParenthesis(string, index):
         # this function finds the index of the closing parenthesis in a string
@@ -217,44 +311,35 @@ class Parser:
 
         return "".join(letterList)
 
-    def sectionsOfInterest(string, **kwargs):
-        """The kwargs will be broken down into separators, groupers and identifiers.
-        The section following a separator until another separator is not of interest.
-        Groupers consist of two characters that mark the opening and closing of
-        a SOI.
-        The identifier is what qualifies the group as of interest. As of now there is
-        only one type of identifier, and it makes an section of interest
-        if it contains that literal identifier"""
+    def locateFunctionCallSections(string, zero=0):
+        """This method locates the indicies of the sections in a called funtion/operator.
+            i.e (23,457,sin(2+x)) -> [[1,2],[4,6],[8,15]]
+            The input string has to start and end with parenthesis.
+            All returned values will be incearsed by the value of 'zero'."""
 
-        separators = kwargs.get("separators")
-        groupers = kwargs.get("groupers")
-        identifiers = kwargs.get("identifiers")
+        parSections = Parser.locateParSections(string[1:-1])
+        parSectionsFlattened = [val for sublist in parSections for val in sublist]
 
-        if "()" in groupers:
-            # currently only functioning grouper is "()"
-            groupedArea = Parser.locateParSections(string)
-
-        searchString = Parser.cutSections(string[:], groupedArea)
-        print(string, "|", searchString)
-        SOI = []
-        foo = ""
-        for i, obj in enumerate(searchString):
-            if obj in separators:
-                print(foo, "foo")
-                SOI.append(foo)
-                foo = ""
+        startOfSec = True
+        res = []
+        foo = []
+        iterable = iter(enumerate(string))
+        for i, obj in iterable:
+            if i == 0:
                 continue
-            foo += obj
-            if i == len(searchString) - 1:
-                SOI.append(foo)
-
-        searchString = list(searchString)
-        for i, section in enumerate(searchString):
-            for id in identifiers:
-                if id not in section:
-                    del searchString[i]
-
-        return SOI
+            if startOfSec:
+                startOfSec = False
+                foo.append(i + zero)
+            elif i in parSectionsFlattened:
+                openIndex = parSectionsFlattened.index(i)
+                for k in range(parSectionsFlattened[openIndex + 1] - i + 1):
+                    next(iterable)
+            elif obj in [",", ")"]:
+                foo.append(i - 1 + zero)
+                res.append(foo)
+                foo = []
+                startOfSec = True
+        return res
 
 
 fNames = [
@@ -270,8 +355,4 @@ fNames = [
 ]
 opNames = ["lp.Add", "lp.Sub", "lp.Mul", "lp.Div"]
 
-foo = "2+(1+(1+23))"
-a = "1+2,2+(3+8(+2)),2"
-print(Parser.parse(foo))
-# print(Parser.parse("lp.Add(1+2(3+8),2)"))
-# FEIL: OMrådene blir feil i searchstring
+print(Parser.parse("sin(2+8*x*sin(1+8*x))"))
