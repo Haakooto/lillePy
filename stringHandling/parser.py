@@ -201,6 +201,8 @@ class Parser:
         return res
 
 
+import sys
+
 fNames = [
     "sin",
     "cos",
@@ -214,4 +216,58 @@ fNames = [
 ]
 opNames = ["lp.Add", "lp.Sub", "lp.Mul", "lp.Div"]
 
-print(Parser.parse("lp.Mul(2*8*x*sin(1+8*x))"))
+f = sys.argv[1]
+
+print(Parser.parse(f))
+
+"""
+# TODO: Bugs:
+    #  Parenthesis
+    # * IndexError if too many left-parentheses,
+        # * no error but print extra if too many right parentheses
+        # TODO: either raise error or remove extra.
+        # ? Could make programm add to end it count is wrong?
+    # * 2+2 and (2+2) return lp.Add(2,2), 2*2 return lp.Mul(2,2)
+        # ! (2*2) return 2,2
+        # TODO: seems program just spits out input.
+    # * unfinished statements pass, but have extra parenthesis, but sometimes dont
+        # ! 2*2* return lp.Mul(2,2,)
+        # ! (2*2*) returns 2,2,
+        # ! sin(2*2*) return sin(2,2))
+        # TODO raise error on imcomplete statement
+    #  Nonsense
+    # * all symbols is treated like variables. using , as example
+        # * if , at end, extra parenthesis is added
+        #  Several examples follow
+        # * a+x,g returns lp.Add(a,x,g)
+        # * a+x, returns lp.Add(a,x))
+        # * ,g+ returns lp.Add(,g))
+        # * x,g+ returns lp.Add(x,g))
+        # * g+ return lp.Add(g))
+        # ! all these should fail
+        # ? this is also true for other symbols, ;, :,  usw
+        # TODO check statement for validity in all parts.
+        # TODO Make sure no wierd notation is used. All special functions are to be defined using normal math with only letters numbers and known operators
+    # * missing parts
+        # * 1++1 returns lp.Add(1,,1)
+        # * 1+++1 returns lp.Add(1,,,1)
+        # * 1+*+1 returns lp.Add(1,lp.Mul(,),1)
+        # TODO raise error
+    #  functions
+    # * multiple mul in function
+        # ! sin(2*2*2) return sin(2,2,2)
+        # * sin(2*2*2+) return sin(lp.Add(lp.Mul(2,2,2)))
+        # TODO make Mul-instance appear
+    # * empty call
+        # ! sin() returns sin))
+        # TODO fix somehow
+    # More complex, valid expressions that fail
+    # * again, * in parenthesis
+        # * 1+(3+2*3+(2*4*1)) return lp.Add(1,lp.Add(3,lp.Mul(2,3),2,4,1))
+            # ! only last part is wrong
+        # ! 1+(3+2*3+(2*4+1)) gives IndexError
+    # * enclosing statement in parenthesis cause failiure
+        # * 2*3+(2+2)*2 works, giving lp.Add(lp.Mul(2,3),lp.Mul(lp.Add(2,2),2))
+        # ! (2*3+(2+2)*2) gives ValueError
+        # ? like wtf should we get ValueError in anything here?
+"""
