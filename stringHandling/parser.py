@@ -53,6 +53,7 @@ class Parser:
                     meanwhile including the "," in the original operator"""
                 if isFuncGroup:
                     build += "("
+
                     # callSections are the areas between any ","'s
                     callSections = Parser.locateFunctionCallSections(
                         string[opening : closing + 1], zero=opening
@@ -213,4 +214,4 @@ fNames = [
 ]
 opNames = ["lp.Add", "lp.Sub", "lp.Mul", "lp.Div"]
 
-print(Parser.parse("sin(2+8*x*sin(1+8*x))"))
+print(Parser.parse("lp.Mul(2*8*x*sin(1+8*x))"))
