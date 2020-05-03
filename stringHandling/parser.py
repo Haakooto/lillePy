@@ -216,9 +216,10 @@ fNames = [
 ]
 opNames = ["lp.Add", "lp.Sub", "lp.Mul", "lp.Div"]
 
-f = sys.argv[1]
-
-print(Parser.parse(f))
+while True:
+    f = input()
+    print(Parser.parse(f))
+    print()
 
 """
 # TODO: Bugs:
