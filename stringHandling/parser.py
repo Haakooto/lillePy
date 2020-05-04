@@ -258,4 +258,13 @@ Unsupported characters and incomplete inputs
     * empty functions calls
         ! sin() should raise error
         TODO check number of operands in function
+
+* Alt som kan testes ser ut til å fungere.
+* Nå må en interpreter konverete stringen til lillePy-instanser
+? tror lp i lp.Add og lp.Mul burde fjernes, så fungerer det som funksjoner, som sin osv.
+TODO Det er her bruker definerer variabler, som x, a og kappa_over_gamma,
+     så disse må hentes ut og bli med videre til interpreter.
+TODO må fiks en simplifier, som kan forenkle uttrykk. Ikke vits å holde på nestede mul og add som bare har tall
+    Denne fungerer repetitivt, så uttrykk forenkles til det ikke er mer å gjøre
+    ? kanskje ha en "suffle" senere for å forsøke å finne andre "minimumsverdier" i enkelhetsfunksjonen (Spør meg)
 """
