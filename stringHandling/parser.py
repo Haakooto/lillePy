@@ -1,39 +1,37 @@
+import sys
+
+
 class Parser:
-    initKwargs = {"includeAdd": True, "includeMul": True}
     oprSymbolDict = {"+": "Add", "*": "Mul"}
 
-    def parse(string, **kwargs):
-        """Due to the nature of the dict().get() function returning None
-            if the key is nonexistent, """
-        if kwargs == {}:
-            kwargs = Parser.initKwargs.copy()
-
-        build = string
+    def parse(string, includeOpr=True):
+        build = string.replace(" ", "")
         for oprSymb, opr in Parser.oprSymbolDict.items():
-            build = Parser.parseOpr(
-                build, opr=oprSymb, includeOpr=kwargs.get(f"include{opr}")
-            )
+            build = Parser.parseOpr(build, opr=oprSymb, includeOpr=includeOpr)
 
         return build
 
     def parseOpr(string, **kwargs):
 
-        opr = kwargs.get("opr")
         """this method will replace the elemtens added in a string with a
         lillepy-expression on the form: a+b+c -> lp.Add(a,b,c).
         includeAdd is optional argument of wether the parser should return
         the result with our without the lp.Add( ... ) around the result"""
 
+        opr = kwargs.get("opr")
         includeOpr = kwargs.get("includeOpr")
-        string = string.replace(" ", "")
 
         build = ""
 
         parSections = Parser.locateParSections(string)
         searchString = Parser.cutSections(string, parSections)
-
         if opr not in searchString:
             includeOpr = False
+        else:
+            includeOpr = True
+
+        if opr not in string:
+            return string
 
         oprIndices = Parser.locateSymbol(string, opr)
         iterString = iter(enumerate(string))
@@ -55,6 +53,9 @@ class Parser:
                     build += "("
 
                     # callSections are the areas between any ","'s
+
+                    Parser.checkPar(string[opening : closing + 1])
+
                     callSections = Parser.locateFunctionCallSections(
                         string[opening : closing + 1], zero=opening
                     )
@@ -62,11 +63,10 @@ class Parser:
                         stringSection = string[sec[0] : sec[-1] + 1]
                         parSections = Parser.locateParSections(stringSection)
                         searchString = Parser.cutSections(stringSection[:], parSections)
-
-                        build += eval(
-                            f'Parser.parse(stringSection, include{Parser.oprSymbolDict[opr]} = {opr in searchString}) + ","'
+                        build += (
+                            Parser.parse(stringSection, includeOpr=opr in searchString)
+                            + ","
                         )
-
                         for k in range(len(stringSection) + 1):
                             next(iterString)
                     build = build[:-1] + ")"
@@ -74,10 +74,9 @@ class Parser:
                 if not isFuncGroup:
                     """If the parenthesis is not a function but just any normal parenthesis, we do not need to bother
                         with checking for the commas"""
-                    stringSection = string[opening + 1 : closing]
-                    build += eval(
-                        f"Parser.parse(stringSection, include{Parser.oprSymbolDict[opr]} = True)"
-                    )
+                    stringSection = string[opening + 1 : closing + 0]
+                    build += Parser.parse(stringSection, includeOpr=opr in searchString)
+
                     for k in range(len(stringSection) + 1):
                         next(iterString)
             elif obj == opr:
@@ -98,15 +97,22 @@ class Parser:
         # its closed counterpart to
         assert string[index] == "(", f'expected symbol "(", got {string[index]}'
         # this is how many '(' are between the current parenthesis and the fisr cllsing parenthesis
-        start_par_amount = string[index + 1 : index + string[index:].index(")")].count(
-            "("
-        )
+
+        try:
+            start_par_amount = string[
+                index + 1 : index + string[index:].index(")")
+            ].count("(")
+        except:
+            print("Error, check parenthesis", string, index)
+            sys.exit()
+
         j = start_par_amount
         i = 0
         while j >= 0:
             if string[index + 1 + i] == ")":
                 j -= 1
             i += 1
+        assert string[index + i] == ")"
         return index + i
 
     def locateSymbol(string, symbol, start=None, stop=None):
@@ -198,7 +204,17 @@ class Parser:
                 res.append(foo)
                 foo = []
                 startOfSec = True
+
         return res
+
+    def checkPar(string, **kwargs):
+        try:
+            Parser.locateParSections(string)
+        except:
+            print("FAILED at", string, "kwargs", kwargs)
+            import sys
+
+            sys.exit()
 
 
 import sys
@@ -216,10 +232,8 @@ fNames = [
 ]
 opNames = ["lp.Add", "lp.Sub", "lp.Mul", "lp.Div"]
 
-while True:
-    f = input()
-    print(Parser.parse(f))
-    print()
+foo = "1+(3*5+(2*1)+2)"
+print(Parser.parse(foo))
 
 """
 # TODO: Bugs:
