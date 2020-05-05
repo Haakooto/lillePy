@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 from numbers import Number as Number
-import lillePy as lp
 
 from .Variable import Variable, Struct
 
@@ -118,6 +117,7 @@ class parentOperator:
                     self, obj.structure, res=self.structure
                 )
             elif self.null_value == 0 and obj.null_value == 1:
+                # add and mul
                 new = obj.copy()
                 coeff = new.structure["number"]
                 new.structure["number"] = new.null_value
@@ -127,6 +127,7 @@ class parentOperator:
                     self.structure[new] = coeff
 
             elif self.null_value == 1 and obj.null_value == 0:
+                # mul and add
                 new = obj.copy()
                 if new in self.structure:
                     self.structure += 1
@@ -239,13 +240,17 @@ class parentOperator:
         return hash(self.structure)
 
     def __add__(self, other):
+        import lillePy as lp
         return lp(f"{self} + {other}")
 
     def __mul__(self, other):
+        import lillePy as lp
         return lp(f"({self}) * {other}")
 
     def __sub__(self, other):
+        import lillePy as lp
         return lp(f"{self} - {other}")
 
     def __div__(self, other):
+        import lillePy as lp
         return lp(f"({self}) / {other}")
