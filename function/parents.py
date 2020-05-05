@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 from numbers import Number as Number
+import lillePy as lp
 
 from .Variable import Variable, Struct
 
@@ -238,17 +239,13 @@ class parentOperator:
         return hash(self.structure)
 
     def __add__(self, other):
-        import lillePy as lp
         return lp(f"{self} + {other}")
 
     def __mul__(self, other):
-        import lillePy as lp
-        return lp(f"{self} * {other}")
+        return lp(f"({self}) * {other}")
 
     def __sub__(self, other):
-        import lillePy as lp
         return lp(f"{self} - {other}")
 
     def __div__(self, other):
-        import lillePy as lp
-        return lp(f"{self} / {other}")
+        return lp(f"({self}) / {other}")
