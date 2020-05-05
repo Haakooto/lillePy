@@ -1,8 +1,15 @@
 import sys
+import re
+import numpy as np
 
 
 class Parser:
-    oprSymbolDict = {"+": "Add", "*": "Mul"}
+    oprSymbolDict = {"+": "add", "*": "mul"}
+
+    def wrapper(string):
+        build = Parser.parse(string)
+        variables = Parser.find_all_variables(string)
+        return build, variables
 
     def parse(string, includeOpr=True):
         build = string.replace(" ", "")
@@ -88,7 +95,7 @@ class Parser:
         """We will only add an lp.Add() around the return object if the called parse
             is not a child of any other ongoing parse."""
         if includeOpr:
-            build = f"lp.{Parser.oprSymbolDict[opr]}({build})"
+            build = f"{Parser.oprSymbolDict[opr]}({build})"
         return build
 
     def locateClosingParenthesis(string, index):
@@ -212,9 +219,26 @@ class Parser:
             Parser.locateParSections(string)
         except:
             print("FAILED at", string, "kwargs", kwargs)
-            import sys
 
             sys.exit()
+
+    def find_all_variables(string, **kwargs):
+        string = string.replace(" ", "")
+        deliminators = "\(|\)|"
+        for k in Parser.oprSymbolDict:
+            deliminators += f"\{k}|"
+        splitted = re.split(deliminators[:-1], string)
+        valids = np.r_[np.arange(65, 91), np.arange(97, 123)]
+        variables = []
+        for opr in splitted:
+            for let in opr:
+                if ord(let) not in valids:
+                    break
+                if opr not in fNames:
+                    variables.append(opr)
+
+
+        return variables
 
 
 fNames = [
@@ -228,10 +252,10 @@ fNames = [
     "acos",
     "asin",
 ]
-opNames = ["lp.Add", "lp.Sub", "lp.Mul", "lp.Div"]
+opNames = ["add", "sub", "mul", "div"]
 
-foo = sys.argv[1]
-print(Parser.parse(foo))
+# foo = sys.argv[1]
+# print(Parser.parse(foo))
 
 """
 Parenthesis (refered to as lefts and/or rights)
