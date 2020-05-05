@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Parser:
-    oprSymbolDict = {"+": "add", "*": "mul"}
+    oprSymbolDict = {"+": "add", "*": "mul", "-": "sub", "/": "div"}
 
     def wrapper(string):
         build = Parser.parse(string)
@@ -236,7 +236,6 @@ class Parser:
                     break
                 if opr not in fNames:
                     variables.append(opr)
-
 
         return variables
 
