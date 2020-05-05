@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 from numbers import Number
-from .subandsuperscript import superscript as susc
 
 
 from .Variable import Variable, Struct
@@ -71,9 +70,8 @@ class mul(parentOperator):
                 if coeff == 1:
                     res += f"{str(thing)}"
                 else:
-                    from .subandsuperscript import superscript
 
-                    res += f"{str(thing)}{superscript(str(coeff))}"
+                    res += f"{str(thing)}^({str(coeff)})"
             if (isinstance(thing, parentFunction)) or (
                 isinstance(thing, parentOperator)
             ):
@@ -84,16 +82,14 @@ class mul(parentOperator):
                     if coeff == 1:
                         res += f"({str(thing)})"
                     else:
-                        from .subandsuperscript import superscript
 
-                        res += f"({str(thing)}){superscript(str(coeff))}"
+                        res += f"({str(thing)})^({str(coeff)})"
                 else:
                     if coeff == 1:
                         res += f"{str(thing)}"
                     else:
-                        from .subandsuperscript import superscript
 
-                        res += f"{str(thing)}{superscript(str(coeff))}"
+                        res += f"{str(thing)}^({str(coeff)})"
 
         return res
 
