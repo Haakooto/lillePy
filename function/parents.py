@@ -236,3 +236,11 @@ class parentOperator:
 
     def __hash__(self):
         return hash(self.structure)
+
+    def __add__(self, other):
+        import lillePy as lp
+        return lp(f"{self} + {other}")
+
+    def __mul__(self, other):
+        import lillePy as lp
+        return lp(f"{self} * {other}")
