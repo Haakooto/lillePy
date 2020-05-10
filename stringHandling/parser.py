@@ -3,18 +3,98 @@ import re
 import numpy as np
 
 
+"""
+Three callTypes:
+both: like addition A+A+A+
+pre: like factorial A!
+sub: (no example)
+
+Also you numerate how many arguments the operator needs.
+If it can take any amount of arguments, you write 0.
+if no number given, 1 is default
+"""
+
+
+class Add:
+    callType = "both"
+    argNo = 0
+
+
+class Mul:
+    callType = "both"
+    argNo = 0
+
+
+class Fact:
+    callType = "pre"
+    argNo = 1
+
+
+class Pow:
+    callType = "both"
+    argNo = 1
+
+
 class Parser:
-    oprSymbolDict = {"+": "add", "*": "mul", "-": "sub", "/": "div"}
+    oprSymbolDict = {
+        "+": "Add",
+        "*": "Mul",
+        "-": "Sub",
+        "/": "Div",
+        "^": "Pow",
+        "!": "Fact",
+    }
 
     def wrapper(string):
         build = Parser.parse(string)
         variables = Parser.find_all_variables(string)
         return build, variables
 
-    def parse(string, includeOpr=True):
+    def parse(string):
         build = string.replace(" ", "")
         for oprSymb, opr in Parser.oprSymbolDict.items():
-            build = Parser.parseOpr(build, opr=oprSymb, includeOpr=includeOpr)
+            build = Parser.parseOpr(build, opr=oprSymb)
+
+        return build
+
+    def parseParenthesis(**kwargs):
+        iterString = kwargs["iterable"]
+        build = kwargs["build"]
+        string = kwargs["string"]
+        index = kwargs["index"]
+
+        opening = index
+        closing = Parser.locateClosingParenthesis(string, index)
+
+        """next we determine if the par is either a function call or a group.
+            we do this because in some instances,
+            we wish to keep the parenthesis, i.e in sin(2+x)->sin(lp.Add(2,x)),
+            and in some cases, we do no not, i.e (2+3)*8 -> lp.Add(2,3)*8"""
+        isFuncGroup = Parser.parIsFunctionGroup(string, index)
+        """If it is a function ,we need to account for the ',' and end any operation there,
+            meanwhile including the "," in the original operator"""
+        if isFuncGroup:
+            build += "("
+
+            # callSections are the areas between any ","'s
+            callSections = Parser.locateFunctionCallSections(
+                string[opening : closing + 1], zero=opening
+            )
+            for sec in callSections:
+                stringSection = string[sec[0] : sec[-1] + 1]
+                build += Parser.parse(stringSection) + ","
+                for k in range(len(stringSection) + 1):
+                    next(iterString)
+            build = build[:-1] + ")"
+
+        if not isFuncGroup:
+            """If the parenthesis is not a function but just any normal parenthesis, we do not need to bother
+                with checking for the commas"""
+            stringSection = string[opening + 1 : closing + 0]
+            build += Parser.parse(stringSection)
+
+            for k in range(len(stringSection) + 1):
+                next(iterString)
 
         return build
 
@@ -26,101 +106,91 @@ class Parser:
         the result with our without the lp.Add( ... ) around the result"""
 
         opr = kwargs.get("opr")
-        includeOpr = kwargs.get("includeOpr")
-
-        build = ""
-
-        parSections = Parser.locateParSections(string)
-        searchString = Parser.cutSections(string, parSections)
-        if opr not in searchString:
-            includeOpr = False
-        else:
-            includeOpr = True
-
         if opr not in string:
             return string
 
-        oprIndices = Parser.locateSymbol(string, opr)
+        build = ""
+
         iterString = iter(enumerate(string))
 
         for index, obj in iterString:
-
             if obj == "(":
-                opening = index
-                closing = Parser.locateClosingParenthesis(string, index)
+                # special method needed for handling parenthesis
+                build = Parser.parseParenthesis(
+                    string=string, index=index, iterable=iterString, build=build
+                )
 
-                """next we determine if the par is either a function call or a group.
-                    we do this because in some instances,
-                    we wish to keep the parenthesis, i.e in sin(2+x)->sin(lp.Add(2,x)),
-                    and in some cases, we do no not, i.e (2+3)*8 -> lp.Add(2,3)*8"""
-                isFuncGroup = Parser.parIsFunctionGroup(string, index)
-                """If it is a function ,we need to account for the ',' and end any operation there,
-                    meanwhile including the "," in the original operator"""
-                if isFuncGroup:
-                    build += "("
-
-                    # callSections are the areas between any ","'s
-
-                    Parser.checkPar(string[opening : closing + 1])
-
-                    callSections = Parser.locateFunctionCallSections(
-                        string[opening : closing + 1], zero=opening
-                    )
-                    for sec in callSections:
-                        stringSection = string[sec[0] : sec[-1] + 1]
-                        parSections = Parser.locateParSections(stringSection)
-                        searchString = Parser.cutSections(stringSection[:], parSections)
-                        build += (
-                            Parser.parse(stringSection, includeOpr=opr in searchString)
-                            + ","
-                        )
-                        for k in range(len(stringSection) + 1):
-                            next(iterString)
-                    build = build[:-1] + ")"
-
-                if not isFuncGroup:
-                    """If the parenthesis is not a function but just any normal parenthesis, we do not need to bother
-                        with checking for the commas"""
-                    stringSection = string[opening + 1 : closing + 0]
-                    build += Parser.parse(stringSection, includeOpr=opr in searchString)
-
-                    for k in range(len(stringSection) + 1):
-                        next(iterString)
             elif obj == opr:
-                build += ","
+                """Different operators are called in different ways. There are
+                a limited amount of ways an operator can be constructed. This is
+                decided in the class property callType"""
+
+                oprName = Parser.oprSymbolDict[opr]
+                callType = eval(f"{oprName}.callType")
+                argNo = eval(f"{oprName}.argNo")
+
+                if callType == "both":
+                    build += ","
+                    continue
+                elif callType == "pre":
+                    callSegment = Parser.locateOpenCallSegment(string, index, flip=True)
+                    print(string[:callSegment], callSegment, len(string))
+                    ## NÅ FANT VI HVILKET OMRÅDE SOM BLIR CALL I F.EKS !
+                elif calltype == "sub":
+                    pass
+
+                # build += ","
                 continue
 
             else:
                 build += obj
-        """We will only add an lp.Add() around the return object if the called parse
-            is not a child of any other ongoing parse."""
-        if includeOpr:
+
+        parSections = Parser.locateParSections(string)
+        searchString = Parser.cutSections(string, parSections)
+        if opr in searchString:
             build = f"{Parser.oprSymbolDict[opr]}({build})"
         return build
 
+    def flipParenthesis(string):
+        """Flips the entire string and rotates the parenthesis respectively.
+            example: 1+(2-3) -> (3-2)+1"""
+        string = list(string[::-1])
+        for i, obj in enumerate(string[:]):
+            if obj == "(":
+                string[i] = ")"
+            elif obj == ")":
+                string[i] = "("
+        return "".join(string)
+
+    def locateOpenCallSegment(string, index, flip=False):
+        """some operators can have an open call segment,
+            like 23! or (1+2*5)!. index must correspond
+            to the first object in the segment , i.e not the opr symbol itself"""
+        if flip:
+            string = Parser.flipParenthesis(string)
+            index = len(string) - index
+        if string[index] == "(":
+            foo = Parser.locateClosingParenthesis(string, index)
+            return foo + len(string[foo:])
+        iterString = iter(string[index:])
+        for i, obj in enumerate(iterString):
+            if obj in ["*", "+", "-", "/"]:
+                return i + index
+
     def locateClosingParenthesis(string, index):
         # this function finds the index of the closing parenthesis in a string
-        # index is the index of the parenthesis we wish to find
-        # its closed counterpart to
+        # index is the index of the parenthesis we wish to find its closed counterpart to
+        assert string.count("(") == string.count(")"), "Error, check parenthesis"
         assert string[index] == "(", f'expected symbol "(", got {string[index]}'
-        # this is how many '(' are between the current parenthesis and the fisr cllsing parenthesis
-
-        try:
-            start_par_amount = string[
-                index + 1 : index + string[index:].index(")")
-            ].count("(")
-        except:
-            print("Error, check parenthesis", string, index)
-            sys.exit()
-
-        j = start_par_amount
-        i = 0
-        while j >= 0:
-            if string[index + 1 + i] == ")":
-                j -= 1
-            i += 1
-        assert string[index + i] == ")"
-        return index + i
+        open = 1
+        string = string[index + 1 :]
+        for i, obj in enumerate(string):
+            if obj == "(":
+                open += 1
+            elif obj == ")":
+                open -= 1
+            if open == 0:
+                return index + i + 1
 
     def locateSymbol(string, symbol, start=None, stop=None):
         # locates the indecies of the symbols "symbol" in the string.
@@ -163,7 +233,7 @@ class Parser:
 
         for fName in fNamesBwd:
             if stringBwd[: len(fName)] == fName:
-                return True
+                return True, fName
         return False
 
     def locateParSections(string):
@@ -188,7 +258,6 @@ class Parser:
             i.e (23,457,sin(2+x)) -> [[1,2],[4,6],[8,15]]
             The input string has to start and end with parenthesis.
             All returned values will be incearsed by the value of 'zero'."""
-
         parSections = Parser.locateParSections(string[1:-1])
         parSectionsFlattened = [val for sublist in parSections for val in sublist]
 
@@ -214,17 +283,9 @@ class Parser:
 
         return res
 
-    def checkPar(string, **kwargs):
-        try:
-            Parser.locateParSections(string)
-        except:
-            print("FAILED at", string, "kwargs", kwargs)
-
-            sys.exit()
-
     def find_all_variables(string, **kwargs):
         string = string.replace(" ", "")
-        deliminators = "\(|\)|"
+        deliminators = "\(|\)|,|"
         for k in Parser.oprSymbolDict:
             deliminators += f"\{k}|"
         splitted = re.split(deliminators[:-1], string)
@@ -239,6 +300,34 @@ class Parser:
 
         return variables
 
+    def locateOpeningParenthesis(string, index):
+        string = list(string[::-1][:])
+        for i, obj in enumerate(string[:]):
+            if obj == "(":
+                string[i] = ")"
+            elif obj == ")":
+                string[i] = "("
+        string = "".join(string)
+        reversesIndices = Parser.locateClosingParenthesis(
+            string, len(string) - index - 1
+        )
+
+        return len(string) - reversesIndices - 1
+
+    def locateFirstSection(string):
+        """Locates the first standalone section in the string.
+            like 34 in 34+28"""
+        illegals = ["+", "*", "-", "/", "^", "(", ")"]
+        res = ""
+        for i, obj in enumerate(string[:]):
+            print(obj)
+            if obj in illegals:
+                print(res, "ille")
+                return res
+            else:
+                res += obj
+        return res
+
 
 fNames = [
     "sin",
@@ -251,10 +340,10 @@ fNames = [
     "acos",
     "asin",
 ]
-opNames = ["add", "sub", "mul", "div"]
+opNames = ["Add", "Sub", "Mul", "Div", "Pow", "Fact"]
 
-# foo = sys.argv[1]
-# print(Parser.parse(foo))
+"2+3-4-5-> Sub(Add(2,3))"
+print(Parser.parse("1+2*1+(2*(1*(3+2)+2*(1+2))+1+2)!+(2+5)"))
 
 """
 Parenthesis (refered to as lefts and/or rights)
@@ -284,7 +373,7 @@ Unsupported characters and incomplete inputs
 
 * Alt som kan testes ser ut til å fungere.
 * Nå må en interpreter konverete stringen til lillePy-instanser
-? tror lp i lp.Add og lp.Mul burde fjernes, så fungerer det som funksjoner, som sin osv.
+? tror lp i lp.Add og lp.Mprintul burde fjernes, så fungerer det som funksjoner, som sin osv.
 TODO Det er her bruker definerer variabler, som x, a og kappa_over_gamma,
      så disse må hentes ut og bli med videre til interpreter.
 TODO må fiks en simplifier, som kan forenkle uttrykk. Ikke vits å holde på nestede mul og add som bare har tall
