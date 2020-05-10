@@ -3,6 +3,8 @@ from .function import *
 from . import stringHandling
 from .stringHandling import *
 
+print("aa")
+
 
 class lillepy:
     __name__ = "lillepy"
@@ -13,5 +15,9 @@ class lillepy:
             exec(f"{var} = Variable('{var}')")
         return eval(foo)
 
+
+from test2 import AAA
+
+print(AAA)
 
 sys.modules[__name__] = lillepy()
