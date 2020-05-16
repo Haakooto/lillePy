@@ -1,7 +1,9 @@
 import sys
 import re
 import numpy as np
+import lillepy
 
+from lillepy.function import *
 
 """
 Three callTypes:
@@ -15,34 +17,13 @@ if no number given, 1 is default
 """
 
 
-class Add:
-    callType = "both"
-    argNo = 0
-
-
-class Mul:
-    callType = "both"
-    argNo = 0
-
-
-class Fact:
-    callType = "pre"
-    argNo = 1
-
-
-class Pow:
-    callType = "both"
-    argNo = 1
-
-
 class Parser:
     oprSymbolDict = {
         "+": "Add",
         "*": "Mul",
-        "-": "Sub",
-        "/": "Div",
         "^": "Pow",
         "!": "Fact",
+        "%": "Yoh",
     }
 
     def wrapper(string):
@@ -54,15 +35,9 @@ class Parser:
         build = string.replace(" ", "")
         for oprSymb, opr in Parser.oprSymbolDict.items():
             build = Parser.parseOpr(build, opr=oprSymb)
-
         return build
 
-    def parseParenthesis(**kwargs):
-        iterString = kwargs["iterable"]
-        build = kwargs["build"]
-        string = kwargs["string"]
-        index = kwargs["index"]
-
+    def parseParenthesis(string, index, iterString, build):
         opening = index
         closing = Parser.locateClosingParenthesis(string, index)
 
@@ -114,32 +89,47 @@ class Parser:
         iterString = iter(enumerate(string))
 
         for index, obj in iterString:
+
             if obj == "(":
                 # special method needed for handling parenthesis
                 build = Parser.parseParenthesis(
-                    string=string, index=index, iterable=iterString, build=build
+                    string=string, index=index, iterString=iterString, build=build
                 )
 
             elif obj == opr:
                 """Different operators are called in different ways. There are
                 a limited amount of ways an operator can be constructed. This is
                 decided in the class property callType"""
+                oprName = Parser.oprSymbolDict[opr]
 
                 oprName = Parser.oprSymbolDict[opr]
                 callType = eval(f"{oprName}.callType")
                 argNo = eval(f"{oprName}.argNo")
 
                 if callType == "both":
-                    build += ","
+                    if argNo == 0:
+                        build += ","
+                    elif argNo == 1:
+                        nextSec = string[
+                            index
+                            + 1 : Parser.locateOpenCallSegment(
+                                string, index, flip=False
+                            )
+                            + 1
+                        ]
+                        return Parser.parseOpr(
+                            f"{Parser.oprSymbolDict[opr]}({build},{nextSec})", opr=opr
+                        )
+
                     continue
                 elif callType == "pre":
-                    callSegment = Parser.locateOpenCallSegment(string, index, flip=True)
-                    print(string[:callSegment], callSegment, len(string))
-                    ## NÅ FANT VI HVILKET OMRÅDE SOM BLIR CALL I F.EKS !
-                elif calltype == "sub":
-                    pass
+                    return f"{Parser.oprSymbolDict[opr]}({build})"
 
-                # build += ","
+                elif callType == "sub":
+                    callSegment = string[
+                        : Parser.locateOpenCallSegment(string, index) - 1
+                    ]
+
                 continue
 
             else:
@@ -147,7 +137,7 @@ class Parser:
 
         parSections = Parser.locateParSections(string)
         searchString = Parser.cutSections(string, parSections)
-        if opr in searchString:
+        if opr in searchString and opr != "!":
             build = f"{Parser.oprSymbolDict[opr]}({build})"
         return build
 
@@ -168,14 +158,20 @@ class Parser:
             to the first object in the segment , i.e not the opr symbol itself"""
         if flip:
             string = Parser.flipParenthesis(string)
-            index = len(string) - index
+            index = len(string) - index - 1
         if string[index] == "(":
             foo = Parser.locateClosingParenthesis(string, index)
             return foo + len(string[foo:])
         iterString = iter(string[index:])
         for i, obj in enumerate(iterString):
-            if obj in ["*", "+", "-", "/"]:
+            if obj in [
+                "*",
+                "+",
+                "-",
+                "/",
+            ]:
                 return i + index
+        return i + index
 
     def locateClosingParenthesis(string, index):
         # this function finds the index of the closing parenthesis in a string
@@ -317,7 +313,7 @@ class Parser:
     def locateFirstSection(string):
         """Locates the first standalone section in the string.
             like 34 in 34+28"""
-        illegals = ["+", "*", "-", "/", "^", "(", ")"]
+        illegals = ["+", "*", "-", "/", "^", "(", ")", "^"]
         res = ""
         for i, obj in enumerate(string[:]):
             print(obj)
@@ -340,11 +336,9 @@ fNames = [
     "acos",
     "asin",
 ]
-opNames = ["Add", "Sub", "Mul", "Div", "Pow", "Fact"]
-
-"2+3-4-5-> Sub(Add(2,3))"
-print(Parser.parse("1+2*1+(2*(1*(3+2)+2*(1+2))+1+2)!+(2+5)"))
-
+opNames = ["Add", "Mul", "Pow", "Fact"]
+if __name__ == "__main__":
+    print(Parser.parse("2+3*(8^3)^3"))
 """
 Parenthesis (refered to as lefts and/or rights)
     * Too many lefts
