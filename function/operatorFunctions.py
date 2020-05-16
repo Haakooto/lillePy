@@ -7,8 +7,10 @@ from .Variable import Variable, Struct
 from .parents import parentFunction, parentOperator
 
 
-class add(parentOperator):
+class Add(parentOperator):
     arglen = None
+    callType = "both"
+    argNo = 0
 
     def call(self, *args, **kwargs):
         res, coeff = self.res_coeff(*args, **kwargs)
@@ -44,9 +46,11 @@ class add(parentOperator):
         return res
 
 
-class mul(parentOperator):
+class Mul(parentOperator):
     arglen = None
     null_value = 1
+    callType = "both"
+    argNo = 0
 
     def call(self, *args, **kwargs):
         res, coeff = self.res_coeff(*args, **kwargs)
@@ -94,7 +98,7 @@ class mul(parentOperator):
         return res
 
 
-class sub(add):
+class Sub(Add):
     arglen = 2
 
     def init(self):
@@ -110,7 +114,7 @@ class sub(add):
             self.append_to_structure(b, "sd")
 
 
-class div(mul):
+class Div(Mul):
     arglen = 2
 
     def init(self):
@@ -148,9 +152,11 @@ class div(mul):
         return res
 
 
-class pow(parentOperator):
+class Pow(parentOperator):
     arglen = 2
     null_value = 1
+    callType = "both"
+    argNo = 1
 
     def call(self, *args, **kwargs):
         if "res" not in kwargs:

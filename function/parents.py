@@ -241,16 +241,20 @@ class parentOperator:
 
     def __add__(self, other):
         import lillePy as lp
+
         return lp(f"{self} + {other}")
 
     def __mul__(self, other):
         import lillePy as lp
+
         return lp(f"({self}) * {other}")
 
     def __sub__(self, other):
         import lillePy as lp
+
         return lp(f"{self} - {other}")
 
     def __div__(self, other):
         import lillePy as lp
+
         return lp(f"({self}) / {other}")
