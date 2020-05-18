@@ -287,12 +287,21 @@ class Parser:
         splitted = re.split(deliminators[:-1], string)
         valids = np.r_[np.arange(65, 91), np.arange(97, 123)]
         variables = []
+
+        try:
+            splitted.remove("")
+        except ValueError:
+            pass
+
         for opr in splitted:
-            for let in opr:
-                if ord(let) not in valids:
+            valid = False
+            for letter in opr:
+                if ord(letter) not in valids:
                     break
-                if opr not in fNames:
-                    variables.append(opr)
+                if opr not in (fNames + variables):
+                    valid = True
+            if valid:
+                variables.append(opr)
 
         return variables
 
